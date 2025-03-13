@@ -1,29 +1,32 @@
 import "./styles.css";
-
-function Project() {
-  const projects = [{ name: "Home", color: "black" }];
-  const addNewProject = (name, color) => {
-    projects.push({ name, color });
-  };
-  const getProject = (name) => projects.find(project => project.name === name) || console.log("no such project!");
-  const getAllProjects = () => projects;
-
-  const deleteProject = (name) => {
-    const projectToDelete = name;
-    const index = projects.findIndex((project) => project.name === projectToDelete);
-    return projects.splice(index, 1);
-  }
-  return { addNewProject, getProject, getAllProjects, deleteProject };
-}
+import ProjectManager from "./projectmanager.js";
 
 console.log("Welcome to get it done!");
 
-const testProj = Project();
-testProj.addNewProject("not-home", "yellow");
-testProj.addNewProject("need-whaat", "blue");
-testProj.addNewProject("do-shi", "purple");
+const gidPM = ProjectManager();
 
-console.log(testProj.getAllProjects());
-console.log(testProj.getProject("do-shi"));
-console.log(testProj.deleteProject("Home"));
-console.log(testProj.getAllProjects());
+gidPM.addNewProject("not-home", "yellow");
+
+const notHome = gidPM.getProject("not-home");
+console.log(notHome.toString());
+notHome.addTask({
+  title: "This must be done",
+  description: "You have to do this",
+  date: "2025-03-15",
+  priority: "High",
+  status: "pending"
+})
+console.log(notHome.toString());
+console.log(gidPM.getProject("not-home"));
+
+gidPM.addNewProject("taskify", "orangered");
+const taskify = gidPM.getProject("taskify");
+taskify.addTask({
+  title: "this is the title",
+  description: "this is the verb to be done",
+  date: "2025-03-27",
+  priority: "Medium",
+  status: "pending"
+});
+
+console.log(gidPM.allProjectString());
