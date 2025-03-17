@@ -1,17 +1,99 @@
-function Project(name, color) {
-  const tasks = {};
+function Project(name, color, initialTasks = {}) {
+  const tasks = { ...initialTasks };
 
   const getName = () => name;
   const getColor = () => color;
   const getTasks = () => tasks;
 
-  const addTask = (taskDetails) => {
-    tasks[taskDetails.title] = taskDetails;
+  const setName = (newName) => {
+    name = newName;
+  };
+  const setColor = (newColor) => {
+    color = newColor;
   };
 
-  const toString = () =>
+  const addTask = (taskDetails) => {
+    console.log("Adding task: ", taskDetails);
+
+    tasks[taskDetails.title] = { ...taskDetails};
+    console.log("Current task: ", tasks);
+  };
+
+  const setTitle = (taskTitle, newTitle) => {
+    console.log(`Changing [${taskTitle}] task title to [${newTitle}]`);
+    if (!tasks[taskTitle]) {
+      console.log("No such task!");
+      return;
+    }
+    const task = tasks[taskTitle];
+    delete tasks[taskTitle];
+    task.title = newTitle;
+    tasks[newTitle] = task;
+  };
+
+  const setDescription = (taskTitle, newDesc) => {
+    if (!tasks[taskTitle]) {
+      console.log("No such task!");
+      return;
+    }
+    tasks[taskTitle].description = newDesc;
+    console.log(`Task [${taskTitle}]'s description updated`);
+  };
+
+  const setDueDate = (taskTitle, newDate) => {
+    if (!tasks[taskTitle]) {
+      console.log("No such task!");
+      return;
+    }
+    tasks[taskTitle].dueDate = newDate;
+  };
+
+  const setPriority = (taskTitle, newPriority) => {
+    console.log(`Changing "${taskTitle}" priority to "${newPriority}"`);
+    if (!tasks[taskTitle]) {
+      console.log("No such task!");
+      return;
+    }
+    tasks[taskTitle].priority = newPriority;
+  };
+
+  
+  
+  const removeTask = (taskTitle) => {
+    if (!tasks[taskTitle]) {
+      console.log("No such task!");
+      return;
+    }
+    delete tasks[taskTitle];
+    console.log(`Task "${taskTitle}" removed`);
+  };
+
+  const taskDone = (title) => {
+    if (!tasks[title]) {
+      console.log("No such task!");
+      return;
+    }
+    tasks[title].status = "done";
+  };
+
+  const toStr = () =>
     `Project: ${name}, Color: ${color}, Tasks:${JSON.stringify(tasks)}`;
-  return { getName, getColor, getTasks, addTask, toString };
+
+  return {
+    getName,
+    getColor,
+    getTasks,
+    setName,
+    setColor,
+    setTitle,
+    setDescription,
+    setPriority,
+    setDueDate,
+    addTask,
+    removeTask,
+    taskDone,
+    toStr,
+  };
 }
 
 export default Project;
