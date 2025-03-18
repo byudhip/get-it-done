@@ -43,16 +43,38 @@ body {
   height: auto;
 }
 
+#left-sidebar {
+  margin: 10px;
+}
+
 #projects {
-  min-height: 90vh;
+  min-height: 80vh;
   padding: 10px;
+}
+
+.project-button {
+  display: block;
+  border: none;
+  cursor: pointer;
+  width: 80%;
+  margin-bottom: 10px;
+  
+}
+
+.add-project-button {
+  width: 80%;
 }
 
 #tasks {
-  min-height: 90vh;
+  min-height: 80vh;
   padding: 10px;
 }
 
+#right-sidebar {
+  margin: 10px;
+}
+
 #due-dates {
+  min-height: 80vh;
   padding: 10px;
 }
