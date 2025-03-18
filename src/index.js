@@ -1,4 +1,5 @@
 import "./styles.css";
+import ProjectManager from "./projectmanager.js";
 import UI from "./ui.js";
 
-const ui = UI();
+const pm = ProjectManager();
