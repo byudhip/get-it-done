@@ -5,9 +5,16 @@ import { addDays } from "date-fns";
 function ProjectManager() {
   const storageKey = "projects";
 
-  const projects = loadFromStorage(storageKey).map((p) => Project(p.name, p.color, p.tasks));
+  const projects = loadFromStorage(storageKey).map((p) => p.name ? Project(p.name, p.color, p.tasks) : p);
+  console.log("Projects after loading:", projects);
 
-  const saveProjects = () => saveToStorage(storageKey, projects);
+  const saveProjects = () => {
+    const plainProjects = projects.map(p => ({
+      name: p.getName(),
+      color: p.getColor(),
+      tasks: p.getTasks(),
+    }));
+    saveToStorage(storageKey, plainProjects)};
   
 
   const addNewProject = (name, color) => {
@@ -102,7 +109,7 @@ function ProjectManager() {
   };
 
   if (projects.length === 0) {
-    addNewProject("Home", "black");
+    addNewProject("Home", "white");
     const dueDate = addDays(new Date(), 7);
     newTask("Home", {
       title: "Welcome to Get it Done!",
