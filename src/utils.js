@@ -1,8 +1,6 @@
 import ProjectManager from "./projectmanager.js";
 import UI from "./ui.js";
 
-const ui = UI();
-
 function getImages(r) {
   let images = {};
   r.keys().forEach((key) => {
@@ -20,6 +18,7 @@ function createEl(tag, id = null, className = null, textContent = null) {
 }
 
 function buttonHandler(e) {
+  
   if (e.target.classList.contains("")||e.target.classList.contains("")) {
     
   } else if (e.target.classList.contains("")) {
