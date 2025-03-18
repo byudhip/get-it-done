@@ -1,0 +1,58 @@
+/* Reset */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+}
+
+/* Body Styles */
+body {
+  font-family: Helvetica, Arial, system-ui;
+  height: 100vh;
+  line-height: 1.5;
+}
+
+#container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+}
+
+#header {
+  min-height: 10vh;
+  grid-column: 1/-1;
+  grid-row: 1/2;
+}
+
+#logo {
+  position: absolute;
+  top: 2%;
+  left: 2%;
+  width: 100px;
+  height: auto;
+}
+
+#projects {
+  min-height: 90vh;
+  padding: 10px;
+}
+
+#tasks {
+  min-height: 90vh;
+  padding: 10px;
+}
+
+#due-dates {
+  padding: 10px;
+}
