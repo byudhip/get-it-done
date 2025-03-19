@@ -15,6 +15,14 @@ textarea {
   font-size: 100%;
 }
 
+/* end of reset */
+
+body {
+  font-family: Helvetica, Arial, system-ui;
+  height: 100vh;
+  line-height: 1.5;
+}
+
 button {
   cursor: pointer;
   border: none;
@@ -27,10 +35,10 @@ button:hover {
   transform: scale(1.01) translateZ(0);
 }
 
-body {
-  font-family: Helvetica, Arial, system-ui;
-  height: 100vh;
-  line-height: 1.5;
+input,
+textarea,
+select {
+  padding: 5px;
 }
 
 #container {
@@ -133,21 +141,59 @@ body {
   padding: 5px;
 }
 
+
 #task-modal {
   position: fixed;
   padding: 10px;
   top: 50%;
   left: 50%;
-  height: 70%;
-  width: 50%;
+  width: auto;
+  background: rgba(0, 0, 0, 0.3);
   transform: translate(-50%, -50%);
+  gap: 15px;
+  border-radius: 8px;
+  border: none;
+  backdrop-filter: blur(1px);
 }
 
 #task-form {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   padding: 25px;
   gap: 15px;
-  grid-template-columns: repeat(2, 1fr);
+}
+
+#task-form label {
+  display: block;
+  font-weight: bold;
+}
+
+#task-form input,
+#task-form textarea,
+#task-form select {
+  width: 100%;
+}
+
+#task-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+#close-modal-button {
+  padding: 5px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+#save-task-button {
+  padding: 5px;
+  background: none;
+  border: none;
+  font-weight: bold;
 }
 
 #right-sidebar {
