@@ -1,7 +1,5 @@
 import PM from "./projectmanager.js";
-import flatpickr from "flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
-import UI from "./ui.js";
+import { UIColor, UI } from "./ui.js";
 
 function getImages(r) {
   let images = {};
@@ -105,14 +103,10 @@ function newTaskModal() {
   const dueDateLabel = createEl("label", null, null, "Due Date");
   dueDateLabel.setAttribute("for", "due-date");
 
-  const dueDateInput = createEl("input","due-date") //Can't use flatpickr if no input element
-  dueDateInput.setAttribute("type", "text"); // Required for flatpickr
-  dueDateInput.required = true;
-  flatpickr(dueDateInput, {
-    dateFormat: "d-m-Y",
-    theme: "light",
-  });
+  const dueDateInput = createEl("input", "due-date"); //Can't use flatpickr if no input element
+  dueDateInput.setAttribute("type", "date");
 
+  dueDateInput.required = true;
   dueDateLabel.appendChild(dueDateInput);
 
   const priorityLabel = createEl("label", null, null, "Priority");
@@ -145,19 +139,33 @@ function newTaskModal() {
 
   statusLabel.appendChild(selectStatus);
 
+  const saveTaskBtn = createEl("button", "save-task-button", null, "Save");
+  saveTaskBtn.style.color = UIColor().getBlackUIFontColor();
+  saveTaskBtn.addEventListener("click", () => {
+    
+  })
+
   const closeModalBtn = createEl("button", "close-modal-button", null, "X");
-  closeModalBtn.addEventListener("click", () => modal.close());
+  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
+  closeModalBtn.addEventListener("click", () => {
+    document.querySelector("#task-modal").close();
+  });
 
   form.appendChild(titleLabel);
   form.appendChild(descriptionLabel);
   form.appendChild(dueDateLabel);
   form.appendChild(priorityLabel);
   form.appendChild(statusLabel);
+  form.appendChild(saveTaskBtn);
   form.appendChild(closeModalBtn);
 
   modal.appendChild(form);
   body.appendChild(modal);
 
+  const labels = document.querySelectorAll("label");
+  for (let label of labels) {
+    label.style.color = UIColor().getBlackUIFontColor();
+  }
   return modal;
 }
 
