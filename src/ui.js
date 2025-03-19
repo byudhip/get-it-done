@@ -1,5 +1,6 @@
 import PM from "./projectmanager.js";
 import * as utils from "./utils.js";
+import { format, parseISO } from "date-fns";
 
 const assets = utils.getImages(
   require.context("./assets", false, /\.(png|jpe?g|svg)$/)
@@ -46,6 +47,7 @@ function UIColor() {
   const getBurntOrangeUI = () => burntOrangeUI;
   const getBurntOrangeUILogo = () => burntOrangeUILogo;
   const getBurntOrangeUIFontColor = () => burntOrangeUIFontColor;
+  const tp = () => "transparent";
   return {
     getBlackUI,
     getBlackUIFontColor,
@@ -62,6 +64,7 @@ function UIColor() {
     getBurntOrangeUI,
     getBurntOrangeUIFontColor,
     getBurntOrangeUILogo,
+    tp,
   };
 }
 
@@ -78,12 +81,12 @@ const UI = (function () {
     const logo = utils.createEl("img", "logo");
 
     logo.src = assets["getitdone-logo.svg"];
-    logo.setAttribute("style",uic.getBlackUILogo());
+    logo.setAttribute("style", uic.getBlackUILogo());
     headerDiv.appendChild(logo);
     container.appendChild(headerDiv);
 
     const leftSidebarDiv = utils.createEl("div", "left-sidebar");
-    leftSidebarDiv.style.borderRight = `1px solid ${uic.getBlackUIFontColor()}`;
+    utils.addRightBorder(leftSidebarDiv, uic.getBlackUIFontColor(), uic.tp());
     container.appendChild(leftSidebarDiv);
 
     const projectsDiv = utils.createEl("div", "projects");
@@ -98,7 +101,7 @@ const UI = (function () {
     leftSidebarDiv.appendChild(projectsDiv);
 
     const middleDiv = utils.createEl("div", "middle");
-    middleDiv.style.borderRight = `1px solid ${uic.getBlackUIFontColor()}`;
+    utils.addRightBorder(middleDiv, uic.getBlackUIFontColor(), uic.tp());
     container.appendChild(middleDiv);
 
     const tasksHeadline = utils.createEl(
@@ -121,14 +124,15 @@ const UI = (function () {
       "section-headline",
       "Upcoming Due"
     );
-    const dueDiv = utils.createEl("div", "due-dates", null, "due date here");
+    const dueDiv = utils.createEl("div", "due-dates", null);
+    dueHeadline.style.color = uic.getBlackUIFontColor();
     rightSidebarDiv.appendChild(dueHeadline);
     rightSidebarDiv.appendChild(dueDiv);
   };
 
   const renderDefaultProject = () => {
-    const projectDiv = document.querySelector("#projects");
-    projectDiv.innerHTML = "";
+    const projectsDiv = document.querySelector("#projects");
+    projectsDiv.innerHTML = "";
 
     const project = PM().getProject(activeProject);
     console.log("Projects: ", project);
@@ -136,23 +140,18 @@ const UI = (function () {
     console.log("Project data:", project);
     const projectEl = utils.createEl("button", null, "project-button");
     projectEl.classList.add("active-project");
-    projectEl.style.backgroundColor = "transparent";
+    projectEl.style.backgroundColor = uic.tp();
     projectEl.style.color = uic.getBlackUIFontColor();
     projectEl.textContent = project.getName();
-    projectDiv.appendChild(projectEl);
-
-    const addProjectBtn = utils.createEl(
-      "button",
-      null,
-      "add-project-button",
-      "+"
+    projectsDiv.appendChild(projectEl);
+    utils.addBtn(
+      projectsDiv,
+      "add-new-project",
+      uic.getBlackUIFontColor()
     );
-    addProjectBtn.style.backgroundColor = "transparent";
-    addProjectBtn.style.color = uic.getBlackUIFontColor();
-    projectDiv.appendChild(addProjectBtn);
   };
 
-  const renderTasks = () => {
+  const renderDefaultTasks = () => {
     const tasksDiv = document.querySelector("#tasks");
     tasksDiv.innerHTML = "";
 
@@ -161,7 +160,8 @@ const UI = (function () {
     const tasks = project.getTasks();
 
     Object.values(tasks).forEach((task) => {
-      const taskElement = utils.createEl("div", null, "task");
+      const taskMain = utils.taskMaker(tasksDiv);
+      // utils.taskBorder(taskMain, uic.getBlackUIFontColor(), uic.tp());
       const taskTitle = utils.createEl("h3", null, "task-headline", task.title);
       const taskDesc = utils.createEl(
         "p",
@@ -171,14 +171,46 @@ const UI = (function () {
       );
       taskTitle.style.color = uic.getBlackUIFontColor();
       taskDesc.style.color = uic.getBlackUIFontColor();
-      taskElement.appendChild(taskTitle);
-      taskElement.appendChild(taskDesc);
-      tasksDiv.appendChild(taskElement);
+
+      utils.taskDetailsDivider(taskDesc, uic.getBlackUIFontColor(), uic.tp());
+      const taskSub = utils.createEl("div", null, "task-sub");
+      const formattedDate = format(parseISO(task.dueDate), "do MMMM yyyy");
+      const taskDate = utils.createEl(
+        "p",
+        null,
+        "task-date",
+        `Due: ${formattedDate}`
+      );
+      taskDate.style.color = uic.getBlackUIFontColor();
+      const taskPriority = utils.createEl(
+        "p",
+        null,
+        "task-priority",
+        `Priority: ${task.priority}`
+      );
+      taskPriority.style.color = uic.getBlackUIFontColor();
+
+      const taskStatus = utils.createEl(
+        "p",
+        null,
+        "task-priority",
+        `Status: ${task.status}`
+      );
+      taskStatus.style.color = uic.getBlackUIFontColor();
+
+      taskMain.appendChild(taskTitle);
+      taskMain.appendChild(taskDesc);
+      taskSub.appendChild(taskDate);
+      taskSub.appendChild(taskPriority);
+      taskSub.appendChild(taskStatus);
+      taskMain.appendChild(taskSub);
+      tasksDiv.appendChild(taskMain);
     });
+    utils.addBtn(tasksDiv, "add-new-task", uic.getBlackUIFontColor());
   };
   initUI();
   renderDefaultProject();
-  renderTasks();
+  renderDefaultTasks();
   return {};
 })();
 
