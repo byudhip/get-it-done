@@ -25,7 +25,6 @@
     "webpack-merge": "^6.0.1"
   },
   "dependencies": {
-    "date-fns": "^4.1.0",
-    "flatpickr": "^4.6.13"
+    "date-fns": "^4.1.0"
   }
 }
