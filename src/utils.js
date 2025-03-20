@@ -1,5 +1,6 @@
 import PM from "./projectmanager.js";
 import { UIColor, UI } from "./ui.js";
+import { format, parse, parseISO } from "date-fns";
 
 function getImages(r) {
   let images = {};
@@ -128,7 +129,7 @@ function newTaskModal() {
   statusLabel.setAttribute("for", "status");
 
   const selectStatus = createEl("select", "status");
-  const statusOptions = ["Not started", "Ongoing", "Roadblocked"];
+  const statusOptions = ["Not started", "Ongoing", "Roadblocked", "Finished"];
 
   for (let option of statusOptions) {
     const choice = createEl("option");
@@ -142,10 +143,17 @@ function newTaskModal() {
   const saveTaskBtn = createEl("button", "save-task-button", null, "Save");
   saveTaskBtn.style.color = UIColor().getBlackUIFontColor();
   saveTaskBtn.addEventListener("click", () => {
-    
-  })
+    PM().newTask(UI.getActiveProject(), {
+      title: titleInput.value,
+      description: descriptionInput.value,
+      dueDate: dueDateInput.value,
+      priority: selectPriority.value,
+      status: selectStatus.value,
+    });
+    UI.renderDefaultTasks();
+  });
 
-  const closeModalBtn = createEl("button", "close-modal-button", null, "X");
+  const closeModalBtn = createEl("button", "close-modal-button", null, "✖");
   closeModalBtn.style.color = UIColor().getBlackUIFontColor();
   closeModalBtn.addEventListener("click", () => {
     document.querySelector("#task-modal").close();
@@ -157,6 +165,7 @@ function newTaskModal() {
   form.appendChild(priorityLabel);
   form.appendChild(statusLabel);
   form.appendChild(saveTaskBtn);
+  
   form.appendChild(closeModalBtn);
 
   modal.appendChild(form);
@@ -169,11 +178,120 @@ function newTaskModal() {
   return modal;
 }
 
-function buttonHandler(e) {
-  if (e.target.classList.contains("") || e.target.classList.contains("")) {
-  } else if (e.target.classList.contains("")) {
-  } else if (e.target.classList.contains("")) {
-  }
+function captureDetails(taskDiv) {
+  const originalDate = taskDiv
+    .querySelector(".task-due-date")
+    .textContent.slice(5); //Original String eg "12th May 2024"
+  const regexedDate = originalDate.replace(/(\d+)(st|nd|rd|th)/, "$1"); //remove the ordinal suffix eg st nd rd from 1st 2nd 3rd
+  console.log(regexedDate);
+  const parsedDate = parse(regexedDate, "d MMMM yyyy", new Date()); //convert the string back to Date object
+  const formattedDate = format(parsedDate, "yyyy-MM-dd"); //format the Date into readable format for native date picker
+  console.log(formattedDate);
+  return {
+    currentTitle: taskDiv.querySelector(".task-headline").textContent,
+    currentDescription: taskDiv.querySelector(".task-description").textContent,
+    currentDueDate: formattedDate,
+    currentPriority: taskDiv
+      .querySelector(".task-priority")
+      .textContent.slice(10),
+    currentStatus: taskDiv.querySelector(".task-status").textContent.slice(8),
+  };
+}
+
+function openEditTaskModal({
+  currentTitle = "",
+  currentDescription,
+  currentDueDate,
+  currentPriority,
+  currentStatus,
+}) {
+  const modal = document.querySelector("#task-modal");
+
+  modal.querySelector("#title").value = currentTitle;
+  modal.querySelector("#description").value = currentDescription;
+  modal.querySelector("#due-date").value = currentDueDate;
+  modal.querySelector("#priority").value = currentPriority;
+  modal.querySelector("#status").value = currentStatus;
+
+  modal.dataset.currentTitle = currentTitle;
+
+  modal.style.display = "block";
+}
+
+function editTaskModal() {
+  const modal = document.querySelector("#task-modal");
+  const titleInput = document.querySelector("#title");
+  const descriptionInput = document.querySelector("#description");
+  const dueDateInput = document.querySelector("#due-date");
+  const selectPriority = document.querySelector("#priority");
+  const selectStatus = document.querySelector("#status");
+  const saveTaskBtn = document.querySelector("#save-task-button");
+  saveTaskBtn.addEventListener("click", () => {
+    PM().changeTaskTitle(
+      UI.getActiveProject(),
+      modal.dataset.currentTitle,
+      titleInput.value
+    );
+    PM().changeTaskDescription(
+      UI.getActiveProject(),
+      modal.dataset.currentTitle,
+      descriptionInput.value
+    );
+    PM().changeTaskDueDate(
+      UI.getActiveProject(),
+      modal.dataset.currentTitle,
+      dueDateInput.value
+    );
+    PM().changeTaskPriority(
+      UI.getActiveProject(),
+      modal.dataset.currentTitle,
+      selectPriority.value
+    );
+    PM().changeTaskStatus(
+      UI.getActiveProject(),
+      modal.dataset.currentTitle,
+      selectStatus.value
+    );
+    UI.renderDefaultTasks();
+  });
+  
+  const closeModalBtn = document.querySelector("#close-modal-button");
+  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
+  closeModalBtn.addEventListener("click", () => {
+    document.querySelector("#task-modal").close();
+  });
+  return modal;
+}
+
+function confirmRemoveTaskModal({taskDiv, currentTitle}) {
+  const body = document.querySelector("body");
+  const modal = createEl("dialog", "confirm-remove-task-modal");
+  const form = createEl("form", "confirm-form");
+  modal.appendChild(form);
+  body.appendChild(modal);
+  
+  const confirmText = createEl("p", null, "confirm-text", `Remove [${currentTitle}] task?`);
+  confirmText.style.color = UIColor().getBlackUIFontColor();
+  const confirmRemoveBtn = createEl("button", "confirm-remove-button", null, "Yes");
+  confirmRemoveBtn.style.color = UIColor().getBlackUIFontColor();
+  confirmRemoveBtn.addEventListener("click", () => {
+    taskDiv.remove();
+    PM().removeTask(UI.getActiveProject(), currentTitle);
+    UI.renderDefaultTasks();
+  })
+
+  const closeModalBtn = createEl("button", "close-modal-button", null, "✖");
+  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
+  closeModalBtn.addEventListener("click", () => {
+    modal.close();
+  });
+
+  form.appendChild(confirmText);
+  form.appendChild(confirmRemoveBtn);
+  form.appendChild(closeModalBtn);
+
+  return modal
+  
 }
 
 export {
@@ -182,7 +300,10 @@ export {
   addBtn,
   taskMaker,
   taskDetailsDivider,
-  newTaskModal,
   addRightBorder,
-  buttonHandler,
+  newTaskModal,
+  captureDetails,
+  openEditTaskModal,
+  editTaskModal,
+  confirmRemoveTaskModal
 };
