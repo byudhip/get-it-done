@@ -71,13 +71,16 @@ function UIColor() {
 const Theme = () => {
   const container = document.querySelector("#container");
   const logo = document.querySelector("#logo");
+  const sectionHeadlines = document.querySelectorAll(".section-headline");
+
+
 };
 
 const UI = (function () {
   let activeProject = "Home";
   const getActiveProject = () => activeProject;
-  function setActiveProject(project) {
-    project = activeProject;
+  const setActiveProject = (project) => {
+    activeProject = project;
   }
   const uic = UIColor();
   const initUI = () => {
@@ -139,20 +142,20 @@ const UI = (function () {
     rightSidebarDiv.appendChild(dueDiv);
   };
 
-  const renderDefaultProject = () => {
+  const renderProjects = () => {
     const projectsDiv = document.querySelector("#projects");
     projectsDiv.innerHTML = "";
 
-    const project = PM().getProject(getActiveProject());
-    console.log("Projects: ", project);
+    const projects = PM().getAllProjects();
 
-    console.log("Project data:", project);
-    const projectEl = utils.createEl("button", null, "project-button");
-    projectEl.classList.add("active-project");
-    projectEl.style.backgroundColor = uic.tp();
-    projectEl.style.color = uic.getBlackUIFontColor();
-    projectEl.textContent = project.getName();
-    projectsDiv.appendChild(projectEl);
+    projects.forEach((project) => {
+      const projectBtn = utils.createEl("button", null, "project-button");
+      projectBtn.style.backgroundColor = uic.tp();
+      projectBtn.style.color = uic.getBlackUIFontColor();
+      projectBtn.textContent = project.getName();
+      projectBtn.setAttribute("data-project", project.getName());
+      projectsDiv.appendChild(projectBtn);
+    });
     utils.addBtn(projectsDiv, "add-new-project", uic.getBlackUIFontColor());
   };
 
@@ -202,7 +205,12 @@ const UI = (function () {
       );
       taskStatus.style.color = uic.getBlackUIFontColor();
 
-      const removeTaskBtn = utils.createEl("button", null, "remove-task-button", "✖");
+      const removeTaskBtn = utils.createEl(
+        "button",
+        null,
+        "remove-task-button",
+        "✖"
+      );
       removeTaskBtn.style.color = uic.getBlackUIFontColor();
 
       taskMain.appendChild(removeTaskBtn);
@@ -217,9 +225,14 @@ const UI = (function () {
     utils.addBtn(tasksDiv, "add-new-task", uic.getBlackUIFontColor());
   };
   initUI();
-  renderDefaultProject();
+  renderProjects();
   renderDefaultTasks();
-  return { getActiveProject, setActiveProject, renderDefaultTasks };
+  return {
+    getActiveProject,
+    setActiveProject,
+    renderProjects,
+    renderDefaultTasks,
+  };
 })();
 
 export { UI, UIColor };
