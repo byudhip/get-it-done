@@ -71,6 +71,67 @@ function taskDetailsDivider(element, gradient1, gradient2) {
   element.appendChild(border);
 }
 
+function newProjectModal() {
+  const body = document.querySelector("body");
+  const modal = createEl("dialog", "project-modal");
+  const form = createEl("form", "project-form");
+  form.setAttribute("action", "");
+
+  const nameLabel = createEl("label", null, null, "Name");
+  nameLabel.setAttribute("for", "project-name");
+  nameLabel.style.color = UIColor().getBlackUIFontColor();
+
+  const nameInput = createEl("input", "project-name");
+  nameInput.setAttribute("type", "text");
+  nameInput.setAttribute("max-length", "25");
+  nameInput.setAttribute("placeholder", "Unicorn");
+  nameInput.required = true;
+
+  nameLabel.appendChild(nameInput);
+
+  const colorLabel = createEl("label", null, null, "Name");
+  colorLabel.setAttribute("for", "color");
+  colorLabel.style.color = UIColor().getBlackUIFontColor();
+
+  const selectColor = createEl("select", "color");
+  const colorOptions = ["Black", "Burgundy", "Dark Green", "Deep Blue", "Burnt Orange" ];
+
+  for (let option of colorOptions) {
+    const choice = createEl("option");
+    choice.value = option;
+    choice.textContent = option;
+    selectColor.appendChild(choice);
+  }
+
+  colorLabel.appendChild(selectColor);
+
+  const saveProjectBtn = createEl("button", "save-project-button", null, "Save");
+  saveProjectBtn.style.color = UIColor().getBlackUIFontColor();
+  saveProjectBtn.addEventListener("click", () => {
+    PM().addNewProject(nameInput.value, selectColor.value);
+    UI.renderProjects();
+    UI.renderDefaultTasks();
+    reapplyListeners();
+    modal.close();
+  })
+
+  const closeModalBtn = createEl("button", "close-modal-button", null, "✖");
+  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
+  closeModalBtn.addEventListener("click", () => {
+    modal.close();
+  });
+
+
+  form.appendChild(nameLabel);
+  form.appendChild(colorLabel);
+  form.appendChild(saveProjectBtn);
+  modal.appendChild(closeModalBtn)
+  modal.appendChild(form);
+  body.appendChild(modal);
+
+  return modal;
+}
+
 function newTaskModal() {
   const body = document.querySelector("body");
   const modal = createEl("dialog", "task-modal");
@@ -254,6 +315,7 @@ function editTaskModal() {
       selectStatus.value
     );
     UI.renderDefaultTasks();
+    reapplyListeners();
   });
 
   const closeModalBtn = document.querySelector("#close-modal-button");
@@ -262,7 +324,7 @@ function editTaskModal() {
     document.querySelector("#task-modal").close();
   });
   return modal;
-}
+};
 
 function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
   const body = document.querySelector("body");
@@ -307,14 +369,18 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
   return modal;
 }
 
+function switchActiveClass() {
+  
+}
+
 function reapplyListeners() {
   const newTaskBtn = document.querySelector(".add-new-task");
   const newProjectBtn = document.querySelector(".add-new-project");
   const taskModal = document.querySelector("#task-modal");
-  const taskForm = document.querySelector("#task-form");
-  // const projectModal = newProjectModal();
+  const projectModal = document.querySelector("#project-modal");
 
   const tasksDiv = document.querySelectorAll(".task-main");
+  const projectBtns = document.querySelectorAll(".project-button");
 
   newTaskBtn.addEventListener("click", () => {
     taskModal.showModal();
@@ -333,9 +399,19 @@ function reapplyListeners() {
     });
   });
 
-  // newProjectBtn.addEventListener("click", () => {
-  //   projectModal.showModal();
-  // })
+  newProjectBtn.addEventListener("click", () => {
+    projectModal.showModal();
+  })
+
+  projectBtns.forEach(button => {
+   button.addEventListener("click", (e) => {
+    const projectBtn = e.target.closest(".project-button");
+    UI.setActiveProject(projectBtn.dataset.project);
+    console.log("Active project: ", UI.getActiveProject());
+    UI.renderDefaultTasks();
+    reapplyListeners();
+   })
+  })
 }
 
 export {
@@ -345,9 +421,11 @@ export {
   taskMaker,
   taskDetailsDivider,
   addRightBorder,
+  newProjectModal,
   newTaskModal,
   captureDetails,
   openEditTaskModal,
   editTaskModal,
   confirmRemoveTaskModal,
+  reapplyListeners,
 };
