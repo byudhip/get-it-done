@@ -113,7 +113,7 @@ function ProjectManager() {
     project.setPriority(taskTitle, newPriority);
   }
   if (projects.length === 0) {
-    addNewProject("Home", "white");
+    addNewProject("Home", "Black");
     const dueDate = addDays(new Date(), 7);
     newTask("Home", {
       title: "Welcome to Get it Done!",
