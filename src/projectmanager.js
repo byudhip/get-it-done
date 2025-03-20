@@ -108,6 +108,10 @@ function ProjectManager() {
     saveProjects();
   };
 
+  const changeTaskStatus = (projectName, taskTitle, newPriority) => {
+    const project = getProject(projectName);
+    project.setPriority(taskTitle, newPriority);
+  }
   if (projects.length === 0) {
     addNewProject("Home", "white");
     const dueDate = addDays(new Date(), 7);
@@ -116,7 +120,7 @@ function ProjectManager() {
       description: "We will help you manage your projects and their tasks!",
       dueDate: dueDate,
       priority: "High",
-      status: "pending",
+      status: "Ongoing",
     });
   }
   return {
@@ -133,6 +137,7 @@ function ProjectManager() {
     changeTaskDescription,
     changeTaskDueDate,
     changeTaskPriority,
+    changeTaskStatus,
     allProjectsStr,
   };
 }
