@@ -1,6 +1,6 @@
 import PM from "./projectmanager.js";
 import * as utils from "./utils.js";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, set } from "date-fns";
 
 const assets = utils.getImages(
   require.context("./assets", false, /\.(png|jpe?g|svg)$/)
@@ -68,8 +68,17 @@ function UIColor() {
   };
 }
 
+const Theme = () => {
+  const container = document.querySelector("#container");
+  const logo = document.querySelector("#logo");
+};
+
 const UI = (function () {
   let activeProject = "Home";
+  const getActiveProject = () => activeProject;
+  function setActiveProject(project) {
+    project = activeProject;
+  }
   const uic = UIColor();
   const initUI = () => {
     const body = document.querySelector("body");
@@ -134,7 +143,7 @@ const UI = (function () {
     const projectsDiv = document.querySelector("#projects");
     projectsDiv.innerHTML = "";
 
-    const project = PM().getProject(activeProject);
+    const project = PM().getProject(getActiveProject());
     console.log("Projects: ", project);
 
     console.log("Project data:", project);
@@ -144,24 +153,19 @@ const UI = (function () {
     projectEl.style.color = uic.getBlackUIFontColor();
     projectEl.textContent = project.getName();
     projectsDiv.appendChild(projectEl);
-    utils.addBtn(
-      projectsDiv,
-      "add-new-project",
-      uic.getBlackUIFontColor()
-    );
+    utils.addBtn(projectsDiv, "add-new-project", uic.getBlackUIFontColor());
   };
 
   const renderDefaultTasks = () => {
     const tasksDiv = document.querySelector("#tasks");
     tasksDiv.innerHTML = "";
 
-    const project = PM().getProject(activeProject);
+    const project = PM().getProject(getActiveProject());
 
     const tasks = project.getTasks();
 
     Object.values(tasks).forEach((task) => {
       const taskMain = utils.taskMaker(tasksDiv);
-      // utils.taskBorder(taskMain, uic.getBlackUIFontColor(), uic.tp());
       const taskTitle = utils.createEl("h3", null, "task-headline", task.title);
       const taskDesc = utils.createEl(
         "p",
@@ -178,7 +182,7 @@ const UI = (function () {
       const taskDate = utils.createEl(
         "p",
         null,
-        "task-date",
+        "task-due-date",
         `Due: ${formattedDate}`
       );
       taskDate.style.color = uic.getBlackUIFontColor();
@@ -193,11 +197,15 @@ const UI = (function () {
       const taskStatus = utils.createEl(
         "p",
         null,
-        "task-priority",
+        "task-status",
         `Status: ${task.status}`
       );
       taskStatus.style.color = uic.getBlackUIFontColor();
 
+      const removeTaskBtn = utils.createEl("button", null, "remove-task-button", "✖");
+      removeTaskBtn.style.color = uic.getBlackUIFontColor();
+
+      taskMain.appendChild(removeTaskBtn);
       taskMain.appendChild(taskTitle);
       taskMain.appendChild(taskDesc);
       taskSub.appendChild(taskDate);
@@ -211,7 +219,7 @@ const UI = (function () {
   initUI();
   renderDefaultProject();
   renderDefaultTasks();
-  return {};
+  return { getActiveProject, setActiveProject, renderDefaultTasks };
 })();
 
 export { UI, UIColor };
