@@ -165,7 +165,7 @@ function newTaskModal() {
   form.appendChild(priorityLabel);
   form.appendChild(statusLabel);
   form.appendChild(saveTaskBtn);
-  
+
   form.appendChild(closeModalBtn);
 
   modal.appendChild(form);
@@ -188,6 +188,7 @@ function captureDetails(taskDiv) {
   const formattedDate = format(parsedDate, "yyyy-MM-dd"); //format the Date into readable format for native date picker
   console.log(formattedDate);
   return {
+    taskDiv,
     currentTitle: taskDiv.querySelector(".task-headline").textContent,
     currentDescription: taskDiv.querySelector(".task-description").textContent,
     currentDueDate: formattedDate,
@@ -254,7 +255,7 @@ function editTaskModal() {
     );
     UI.renderDefaultTasks();
   });
-  
+
   const closeModalBtn = document.querySelector("#close-modal-button");
   closeModalBtn.style.color = UIColor().getBlackUIFontColor();
   closeModalBtn.addEventListener("click", () => {
@@ -263,22 +264,35 @@ function editTaskModal() {
   return modal;
 }
 
-function confirmRemoveTaskModal({taskDiv, currentTitle}) {
+function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
   const body = document.querySelector("body");
   const modal = createEl("dialog", "confirm-remove-task-modal");
   const form = createEl("form", "confirm-form");
   modal.appendChild(form);
   body.appendChild(modal);
-  
-  const confirmText = createEl("p", null, "confirm-text", `Remove [${currentTitle}] task?`);
+
+  const confirmText = createEl(
+    "p",
+    null,
+    "confirm-text",
+    `Remove [${currentTitle}] task?`
+  );
   confirmText.style.color = UIColor().getBlackUIFontColor();
-  const confirmRemoveBtn = createEl("button", "confirm-remove-button", null, "Yes");
+  const confirmRemoveBtn = createEl(
+    "button",
+    "confirm-remove-button",
+    null,
+    "Yes"
+  );
   confirmRemoveBtn.style.color = UIColor().getBlackUIFontColor();
-  confirmRemoveBtn.addEventListener("click", () => {
+  confirmRemoveBtn.addEventListener("click", (e) => {
+    e.preventDefault();
     taskDiv.remove();
     PM().removeTask(UI.getActiveProject(), currentTitle);
     UI.renderDefaultTasks();
-  })
+    reapplyListeners(); 
+    modal.close();
+  });
 
   const closeModalBtn = createEl("button", "close-modal-button", null, "✖");
   closeModalBtn.style.color = UIColor().getBlackUIFontColor();
@@ -290,8 +304,38 @@ function confirmRemoveTaskModal({taskDiv, currentTitle}) {
   form.appendChild(confirmRemoveBtn);
   form.appendChild(closeModalBtn);
 
-  return modal
-  
+  return modal;
+}
+
+function reapplyListeners() {
+  const newTaskBtn = document.querySelector(".add-new-task");
+  const newProjectBtn = document.querySelector(".add-new-project");
+  const taskModal = document.querySelector("#task-modal");
+  const taskForm = document.querySelector("#task-form");
+  // const projectModal = newProjectModal();
+
+  const tasksDiv = document.querySelectorAll(".task-main");
+
+  newTaskBtn.addEventListener("click", () => {
+    taskModal.showModal();
+  });
+
+  tasksDiv.forEach((task) => {
+    task.addEventListener("click", (e) => {
+      const taskDiv = e.target.closest(".task-main");
+      const taskDetails = captureDetails(taskDiv);
+      console.log("Task div:", taskDiv, ", Clicked element:", e.target);
+      if (e.target.matches(".remove-task-button")) {
+        confirmRemoveTaskModal(taskDetails).showModal();
+      } else {
+        openEditTaskModal(taskDetails);
+      }
+    });
+  });
+
+  // newProjectBtn.addEventListener("click", () => {
+  //   projectModal.showModal();
+  // })
 }
 
 export {
@@ -305,5 +349,5 @@ export {
   captureDetails,
   openEditTaskModal,
   editTaskModal,
-  confirmRemoveTaskModal
+  confirmRemoveTaskModal,
 };
