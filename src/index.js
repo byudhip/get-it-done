@@ -5,3 +5,7 @@ import UI from "./ui.js";
 
 const pm = ProjectManager();
 
+utils.newTaskModal();
+utils.newProjectModal();
+utils.reapplyListeners();
+
