@@ -15,7 +15,7 @@ function Project(name, color, initialTasks = {}) {
   const addTask = (taskDetails) => {
     console.log("Adding task: ", taskDetails);
 
-    tasks[taskDetails.title] = { ...taskDetails};
+    tasks[taskDetails.title] = { ...taskDetails };
     console.log("Current task: ", tasks);
   };
 
@@ -57,8 +57,14 @@ function Project(name, color, initialTasks = {}) {
     tasks[taskTitle].priority = newPriority;
   };
 
-  
-  
+  const setStatus = (taskTitle, newStatus) => {
+    if (!tasks[taskTitle]) {
+      console.log("No such task!");
+      return;
+    }
+    tasks[title].status = newStatus;
+  };
+
   const removeTask = (taskTitle) => {
     if (!tasks[taskTitle]) {
       console.log("No such task!");
@@ -66,14 +72,6 @@ function Project(name, color, initialTasks = {}) {
     }
     delete tasks[taskTitle];
     console.log(`Task "${taskTitle}" removed`);
-  };
-
-  const taskDone = (title) => {
-    if (!tasks[title]) {
-      console.log("No such task!");
-      return;
-    }
-    tasks[title].status = "done";
   };
 
   const toStr = () =>
@@ -89,9 +87,9 @@ function Project(name, color, initialTasks = {}) {
     setDescription,
     setPriority,
     setDueDate,
+    setStatus,
     addTask,
     removeTask,
-    taskDone,
     toStr,
   };
 }
