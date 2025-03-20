@@ -143,7 +143,7 @@ select {
 }
 
 
-#task-modal, #confirm-remove-task-modal {
+#task-modal, #confirm-remove-task-modal, #project-modal {
   position: fixed;
   padding: 10px;
   top: 50%;
@@ -157,21 +157,25 @@ select {
   backdrop-filter: blur(1px);
 }
 
-#task-form {
+#task-form, #project-form {
   display: flex;
   flex-direction: column;
   padding: 25px;
   gap: 15px;
 }
 
-#task-form label {
+#task-form label, #project-form label {
   display: block;
   font-weight: bold;
 }
 
 #task-form input,
 #task-form textarea,
-#task-form select {
+#task-form select,
+#project-form input,
+#project-form textarea,
+#project-form select
+ {
   width: 100%;
 }
 
@@ -190,7 +194,7 @@ select {
   cursor: pointer;
 }
 
-#save-task-button, #confirm-remove-button {
+#save-task-button, #confirm-remove-button, #save-project-button {
   padding: 5px;
   background: none;
   border: none;
