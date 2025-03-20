@@ -107,6 +107,7 @@ select {
 
 .task-main {
   padding: 10px;
+  margin-bottom: 10px;
   transition: transform 0.3s ease-in-out;
   cursor: pointer;
   will-change: transform;
@@ -142,13 +143,13 @@ select {
 }
 
 
-#task-modal {
+#task-modal, #confirm-remove-task-modal {
   position: fixed;
   padding: 10px;
   top: 50%;
   left: 50%;
   width: auto;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.1);
   transform: translate(-50%, -50%);
   gap: 15px;
   border-radius: 8px;
@@ -179,7 +180,7 @@ select {
   min-height: 80px;
 }
 
-#close-modal-button {
+#close-modal-button, .remove-task-button {
   padding: 5px;
   position: absolute;
   top: 10px;
@@ -189,7 +190,7 @@ select {
   cursor: pointer;
 }
 
-#save-task-button {
+#save-task-button, #confirm-remove-button {
   padding: 5px;
   background: none;
   border: none;
