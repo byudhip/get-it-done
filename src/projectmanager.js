@@ -5,26 +5,25 @@ import { addDays } from "date-fns";
 function ProjectManager() {
   const storageKey = "projects";
 
-  const projects = loadFromStorage(storageKey).map((p) => p.name ? Project(p.name, p.color, p.tasks) : p);
+  const projects = loadFromStorage(storageKey).map((p) => p.name ? Project(p.name, p.tasks) : p);
   console.log("Projects after loading:", projects);
 
   const saveProjects = () => {
     const plainProjects = projects.map(p => ({
       name: p.getName(),
-      color: p.getColor(),
       tasks: p.getTasks(),
     }));
     saveToStorage(storageKey, plainProjects)};
   
 
-  const addNewProject = (name, color) => {
+  const addNewProject = (name) => {
     for (let project of projects) {
       if (project.getName() === name) {
         console.log("project name exists!");
         return;
       }
     }
-    const newProject = Project(name, color);
+    const newProject = Project(name);
     projects.push(newProject);
     saveProjects();
   };
@@ -36,16 +35,6 @@ function ProjectManager() {
       return;
     }
     project.setName(newName);
-    saveProjects();
-  };
-
-  const recolorProject = (name, newColor) => {
-    const project = getProject(name);
-    if (!project) {
-      console.log("No such project!");
-      return;
-    }
-    project.setColor(newColor);
     saveProjects();
   };
 
@@ -113,7 +102,7 @@ function ProjectManager() {
     project.setPriority(taskTitle, newPriority);
   }
   if (projects.length === 0) {
-    addNewProject("Home", "Black");
+    addNewProject("Home");
     const dueDate = addDays(new Date(), 7);
     newTask("Home", {
       title: "Welcome to Get it Done!",
@@ -127,7 +116,6 @@ function ProjectManager() {
     saveProjects,
     addNewProject,
     renameProject,
-    recolorProject,
     getAllProjects,
     getProject,
     deleteProject,
