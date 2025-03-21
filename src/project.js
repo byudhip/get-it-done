@@ -1,15 +1,11 @@
-function Project(name, color, initialTasks = {}) {
+function Project(name, initialTasks = {}) {
   const tasks = { ...initialTasks };
 
   const getName = () => name;
-  const getColor = () => color;
   const getTasks = () => tasks;
 
   const setName = (newName) => {
     name = newName;
-  };
-  const setColor = (newColor) => {
-    color = newColor;
   };
 
   const addTask = (taskDetails) => {
@@ -79,10 +75,8 @@ function Project(name, color, initialTasks = {}) {
 
   return {
     getName,
-    getColor,
     getTasks,
     setName,
-    setColor,
     setTitle,
     setDescription,
     setPriority,
