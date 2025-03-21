@@ -2,6 +2,8 @@ import PM from "./projectmanager.js";
 import { UIColor, UI } from "./ui.js";
 import { format, parse, parseISO } from "date-fns";
 
+const ui = UI();
+
 function getImages(r) {
   let images = {};
   r.keys().forEach((key) => {
@@ -23,10 +25,9 @@ function addBtn(element, className, fontColor) {
     "button",
     null,
     className,
-    `${className === "add-new-task" ? "New Task" : " New Project"}`
+    `${className === "add-new-task-button" ? "New Task" : " New Project"}`
   );
   button.style.width = "100%";
-  button.style.padding = "5px";
   button.style.marginTop = "5px";
   button.style.backgroundColor = "transparent";
   button.style.color = fontColor;
@@ -38,6 +39,7 @@ function addRightBorder(element, gradient1, gradient2) {
 
   let border = createEl("div");
   border.style.position = "absolute";
+  border.classList.add("right-border");
   border.style.top = "0%";
   border.style.bottom = "1%";
   border.style.right = "0";
@@ -61,6 +63,7 @@ function taskDetailsDivider(element, gradient1, gradient2) {
   element.style.position = "relative";
 
   let border = createEl("div");
+  border.classList.add("divider");
   border.style.position = "absolute";
   border.style.left = "0";
   border.style.bottom = "0";
@@ -83,6 +86,7 @@ function newProjectModal() {
 
   const nameInput = createEl("input", "project-name");
   nameInput.setAttribute("type", "text");
+  nameInput.setAttribute("name", "project-name");
   nameInput.setAttribute("max-length", "25");
   nameInput.setAttribute("placeholder", "Unicorn");
   nameInput.required = true;
@@ -90,11 +94,17 @@ function newProjectModal() {
   nameLabel.appendChild(nameInput);
 
   const colorLabel = createEl("label", null, null, "Name");
-  colorLabel.setAttribute("for", "color");
+  colorLabel.setAttribute("for", "project-color");
   colorLabel.style.color = UIColor().getBlackUIFontColor();
 
-  const selectColor = createEl("select", "color");
-  const colorOptions = ["Black", "Burgundy", "Dark Green", "Deep Blue", "Burnt Orange" ];
+  const selectColor = createEl("select", "project-color");
+  const colorOptions = [
+    "Black",
+    "Burgundy",
+    "Dark Green",
+    "Deep Blue",
+    "Burnt Orange",
+  ];
 
   for (let option of colorOptions) {
     const choice = createEl("option");
@@ -105,27 +115,27 @@ function newProjectModal() {
 
   colorLabel.appendChild(selectColor);
 
-  const saveProjectBtn = createEl("button", "save-project-button", null, "Save");
+  const saveProjectBtn = createEl(
+    "button",
+    "save-project-button",
+    null,
+    "Save"
+  );
   saveProjectBtn.style.color = UIColor().getBlackUIFontColor();
   saveProjectBtn.addEventListener("click", () => {
     PM().addNewProject(nameInput.value, selectColor.value);
-    UI.renderProjects();
-    UI.renderDefaultTasks();
-    reapplyListeners();
-    modal.close();
-  })
-
-  const closeModalBtn = createEl("button", "close-modal-button", null, "✖");
-  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
-  closeModalBtn.addEventListener("click", () => {
+    ui.renderProjects();
+    ui.renderTasks();
     modal.close();
   });
 
+  const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
+  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
 
   form.appendChild(nameLabel);
   form.appendChild(colorLabel);
   form.appendChild(saveProjectBtn);
-  modal.appendChild(closeModalBtn)
+  form.appendChild(closeModalBtn);
   modal.appendChild(form);
   body.appendChild(modal);
 
@@ -139,10 +149,11 @@ function newTaskModal() {
   form.setAttribute("action", "");
 
   const titleLabel = createEl("label", null, null, "Title");
-  titleLabel.setAttribute("for", "title");
+  titleLabel.setAttribute("for", "task-title");
 
-  const titleInput = createEl("input", "title");
+  const titleInput = createEl("input", "task-title");
   titleInput.setAttribute("type", "text");
+  titleInput.setAttribute("name", "task-title");
   titleInput.setAttribute("max-length", "25");
   titleInput.setAttribute("placeholder", "Get Groceries");
   titleInput.required = true;
@@ -150,9 +161,9 @@ function newTaskModal() {
   titleLabel.appendChild(titleInput);
 
   const descriptionLabel = createEl("label", null, null, "Description");
-  descriptionLabel.setAttribute("for", "description");
+  descriptionLabel.setAttribute("for", "task-description");
 
-  const descriptionInput = createEl("textarea", "description");
+  const descriptionInput = createEl("textarea", "task-description");
   descriptionInput.setAttribute("max-length", "250");
   descriptionInput.setAttribute(
     "placeholder",
@@ -163,18 +174,19 @@ function newTaskModal() {
   descriptionLabel.appendChild(descriptionInput);
 
   const dueDateLabel = createEl("label", null, null, "Due Date");
-  dueDateLabel.setAttribute("for", "due-date");
+  dueDateLabel.setAttribute("for", "task-due-date");
 
-  const dueDateInput = createEl("input", "due-date"); //Can't use flatpickr if no input element
+  const dueDateInput = createEl("input", "task-due-date");
   dueDateInput.setAttribute("type", "date");
+  dueDateInput.setAttribute("name", "task-due-date");
 
   dueDateInput.required = true;
   dueDateLabel.appendChild(dueDateInput);
 
   const priorityLabel = createEl("label", null, null, "Priority");
-  priorityLabel.setAttribute("for", "priority");
+  priorityLabel.setAttribute("for", "task-priority");
 
-  const selectPriority = createEl("select", "priority");
+  const selectPriority = createEl("select", "task-priority");
   const priorityOptions = ["High", "Medium", "Low"];
 
   for (let option of priorityOptions) {
@@ -187,9 +199,9 @@ function newTaskModal() {
   priorityLabel.appendChild(selectPriority);
 
   const statusLabel = createEl("label", null, null, "Status");
-  statusLabel.setAttribute("for", "status");
+  statusLabel.setAttribute("for", "task-status");
 
-  const selectStatus = createEl("select", "status");
+  const selectStatus = createEl("select", "task-status");
   const statusOptions = ["Not started", "Ongoing", "Roadblocked", "Finished"];
 
   for (let option of statusOptions) {
@@ -204,21 +216,18 @@ function newTaskModal() {
   const saveTaskBtn = createEl("button", "save-task-button", null, "Save");
   saveTaskBtn.style.color = UIColor().getBlackUIFontColor();
   saveTaskBtn.addEventListener("click", () => {
-    PM().newTask(UI.getActiveProject(), {
+    PM().newTask(ui.getActiveProject(), {
       title: titleInput.value,
       description: descriptionInput.value,
       dueDate: dueDateInput.value,
       priority: selectPriority.value,
       status: selectStatus.value,
     });
-    UI.renderDefaultTasks();
+    ui.renderTasks();
   });
 
-  const closeModalBtn = createEl("button", "close-modal-button", null, "✖");
+  const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
   closeModalBtn.style.color = UIColor().getBlackUIFontColor();
-  closeModalBtn.addEventListener("click", () => {
-    document.querySelector("#task-modal").close();
-  });
 
   form.appendChild(titleLabel);
   form.appendChild(descriptionLabel);
@@ -227,9 +236,8 @@ function newTaskModal() {
   form.appendChild(statusLabel);
   form.appendChild(saveTaskBtn);
 
-  form.appendChild(closeModalBtn);
-
   modal.appendChild(form);
+  modal.appendChild(closeModalBtn);
   body.appendChild(modal);
 
   const labels = document.querySelectorAll("label");
@@ -269,62 +277,55 @@ function openEditTaskModal({
 }) {
   const modal = document.querySelector("#task-modal");
 
-  modal.querySelector("#title").value = currentTitle;
-  modal.querySelector("#description").value = currentDescription;
-  modal.querySelector("#due-date").value = currentDueDate;
-  modal.querySelector("#priority").value = currentPriority;
-  modal.querySelector("#status").value = currentStatus;
+  modal.querySelector("#task-title").value = currentTitle;
+  modal.querySelector("#task-description").value = currentDescription;
+  modal.querySelector("#task-due-date").value = currentDueDate;
+  modal.querySelector("#task-priority").value = currentPriority;
+  modal.querySelector("#task-status").value = currentStatus;
 
   modal.dataset.currentTitle = currentTitle;
 
-  modal.style.display = "block";
+  modal.showModal();
 }
 
 function editTaskModal() {
   const modal = document.querySelector("#task-modal");
-  const titleInput = document.querySelector("#title");
-  const descriptionInput = document.querySelector("#description");
-  const dueDateInput = document.querySelector("#due-date");
-  const selectPriority = document.querySelector("#priority");
-  const selectStatus = document.querySelector("#status");
+  const titleInput = document.querySelector("#task-title");
+  const descriptionInput = document.querySelector("#task-description");
+  const dueDateInput = document.querySelector("#task-due-date");
+  const selectPriority = document.querySelector("#task-priority");
+  const selectStatus = document.querySelector("#task-status");
   const saveTaskBtn = document.querySelector("#save-task-button");
   saveTaskBtn.addEventListener("click", () => {
     PM().changeTaskTitle(
-      UI.getActiveProject(),
+      ui.getActiveProject(),
       modal.dataset.currentTitle,
       titleInput.value
     );
     PM().changeTaskDescription(
-      UI.getActiveProject(),
+      ui.getActiveProject(),
       modal.dataset.currentTitle,
       descriptionInput.value
     );
     PM().changeTaskDueDate(
-      UI.getActiveProject(),
+      ui.getActiveProject(),
       modal.dataset.currentTitle,
       dueDateInput.value
     );
     PM().changeTaskPriority(
-      UI.getActiveProject(),
+      ui.getActiveProject(),
       modal.dataset.currentTitle,
       selectPriority.value
     );
     PM().changeTaskStatus(
-      UI.getActiveProject(),
+      ui.getActiveProject(),
       modal.dataset.currentTitle,
       selectStatus.value
     );
-    UI.renderDefaultTasks();
-    reapplyListeners();
-  });
-
-  const closeModalBtn = document.querySelector("#close-modal-button");
-  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
-  closeModalBtn.addEventListener("click", () => {
-    document.querySelector("#task-modal").close();
+    ui.renderTasks();
   });
   return modal;
-};
+}
 
 function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
   const body = document.querySelector("body");
@@ -350,39 +351,36 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
   confirmRemoveBtn.addEventListener("click", (e) => {
     e.preventDefault();
     taskDiv.remove();
-    PM().removeTask(UI.getActiveProject(), currentTitle);
-    UI.renderDefaultTasks();
-    reapplyListeners(); 
+    PM().removeTask(ui.getActiveProject(), currentTitle);
+    ui.renderTasks();
     modal.close();
   });
 
-  const closeModalBtn = createEl("button", "close-modal-button", null, "✖");
+  const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
   closeModalBtn.style.color = UIColor().getBlackUIFontColor();
-  closeModalBtn.addEventListener("click", () => {
-    modal.close();
-  });
 
   form.appendChild(confirmText);
   form.appendChild(confirmRemoveBtn);
-  form.appendChild(closeModalBtn);
+  modal.appendChild(closeModalBtn);
 
   return modal;
 }
 
-function switchActiveClass() {
-  
-}
-
 function reapplyListeners() {
-  const newTaskBtn = document.querySelector(".add-new-task");
-  const newProjectBtn = document.querySelector(".add-new-project");
+  const newTaskBtn = document.querySelector(".add-new-task-button");
+  const newProjectBtn = document.querySelector(".add-new-project-button");
   const taskModal = document.querySelector("#task-modal");
   const projectModal = document.querySelector("#project-modal");
 
   const tasksDiv = document.querySelectorAll(".task-main");
-  const projectBtns = document.querySelectorAll(".project-button");
+  const projectDivs = document.querySelectorAll(".project-div");
 
   newTaskBtn.addEventListener("click", () => {
+    document.querySelector("#task-title").value = "";
+    document.querySelector("#task-description").value = "";
+    document.querySelector("#task-due-date").value = "";
+    document.querySelector("#task-priority").value = "";
+    document.querySelector("#task-status").value = "";
     taskModal.showModal();
   });
 
@@ -401,17 +399,31 @@ function reapplyListeners() {
 
   newProjectBtn.addEventListener("click", () => {
     projectModal.showModal();
-  })
+  });
 
-  projectBtns.forEach(button => {
-   button.addEventListener("click", (e) => {
-    const projectBtn = e.target.closest(".project-button");
-    UI.setActiveProject(projectBtn.dataset.project);
-    console.log("Active project: ", UI.getActiveProject());
-    UI.renderDefaultTasks();
-    reapplyListeners();
-   })
-  })
+  projectDivs.forEach((div) => {
+    div.addEventListener("click", (e) => {
+      const projectDiv = e.target.closest(".project-div");
+      const newProject = projectDiv.dataset.project;
+      if (newProject !== ui.getActiveProject()) {
+        ui.setActiveProject(newProject);
+        console.log("Active project: ", ui.getActiveProject());
+        ui.renderTasks();
+      }
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (e.target.matches(".close-modal-button")) {
+      const modal = e.target.closest("dialog");
+      if (modal && modal.id === "confirm-remove-task-modal") {
+        modal.close();
+        modal.remove();
+      } else {
+        modal.close();
+      }
+    }
+  });
 }
 
 export {
