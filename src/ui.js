@@ -69,19 +69,47 @@ function UIColor() {
 }
 
 const Theme = () => {
+  const uic = UIColor();
   const container = document.querySelector("#container");
   const logo = document.querySelector("#logo");
   const sectionHeadlines = document.querySelectorAll(".section-headline");
+  const rightBorders = document.querySelectorAll(".right-border");
+  const projectNameDivs = document.querySelectorAll(".project-name-div");
+  const removeProjectBtns = document.querySelectorAll(".remove-project-button");
+  const newProjectBtn = document.querySelector(".add-new-project-button");
+  const addRightBorder = utils.addRightBorder;
 
+  const removeTaskBtns = document.querySelectorAll(".remove-task-button");
+  const tasksHeadlines = document.querySelectorAll(".task-headline");
+  const taskDescriptions = document.querySelectorAll(".task-description");
+  const taskDetailsDivider = utils.taskDetailsDivider;
 
+  const taskDueDates = document.querySelectorAll(".task-due-date");
+  const taskPriorities = document.querySelectorAll(".task-priority");
 };
 
-const UI = (function () {
-  let activeProject = "Home";
-  const getActiveProject = () => activeProject;
-  const setActiveProject = (project) => {
-    activeProject = project;
-  }
+const UI = () => {
+  const projects = PM().getAllProjects();
+  let activeProject = projects.length > 0 ? projects[0].getName() : null;
+  const setActiveProject = (newProject) => {
+    if (newProject === activeProject) return;
+
+    const projectNames = projects.map((p) => p.getName());
+    if (projectNames.includes(newProject)) {
+      activeProject = newProject;
+    } else {
+      activeProject = projects.length > 0 ? projects[0].getName() : null;
+    }
+  };
+  const getActiveProject = () => {
+    const projectNames = projects.map((p) => p.getName());
+    return projectNames.includes(activeProject)
+      ? activeProject
+      : projects.length > 0
+      ? projects[0].getName()
+      : null;
+  };
+
   const uic = UIColor();
   const initUI = () => {
     const body = document.querySelector("body");
@@ -149,90 +177,131 @@ const UI = (function () {
     const projects = PM().getAllProjects();
 
     projects.forEach((project) => {
-      const projectBtn = utils.createEl("button", null, "project-button");
-      projectBtn.style.backgroundColor = uic.tp();
-      projectBtn.style.color = uic.getBlackUIFontColor();
-      projectBtn.textContent = project.getName();
-      projectBtn.setAttribute("data-project", project.getName());
-      projectsDiv.appendChild(projectBtn);
-    });
-    utils.addBtn(projectsDiv, "add-new-project", uic.getBlackUIFontColor());
-  };
-
-  const renderDefaultTasks = () => {
-    const tasksDiv = document.querySelector("#tasks");
-    tasksDiv.innerHTML = "";
-
-    const project = PM().getProject(getActiveProject());
-
-    const tasks = project.getTasks();
-
-    Object.values(tasks).forEach((task) => {
-      const taskMain = utils.taskMaker(tasksDiv);
-      const taskTitle = utils.createEl("h3", null, "task-headline", task.title);
-      const taskDesc = utils.createEl(
-        "p",
-        null,
-        "task-description",
-        task.description
-      );
-      taskTitle.style.color = uic.getBlackUIFontColor();
-      taskDesc.style.color = uic.getBlackUIFontColor();
-
-      utils.taskDetailsDivider(taskDesc, uic.getBlackUIFontColor(), uic.tp());
-      const taskSub = utils.createEl("div", null, "task-sub");
-      const formattedDate = format(parseISO(task.dueDate), "do MMMM yyyy");
-      const taskDate = utils.createEl(
-        "p",
-        null,
-        "task-due-date",
-        `Due: ${formattedDate}`
-      );
-      taskDate.style.color = uic.getBlackUIFontColor();
-      const taskPriority = utils.createEl(
-        "p",
-        null,
-        "task-priority",
-        `Priority: ${task.priority}`
-      );
-      taskPriority.style.color = uic.getBlackUIFontColor();
-
-      const taskStatus = utils.createEl(
-        "p",
-        null,
-        "task-status",
-        `Status: ${task.status}`
-      );
-      taskStatus.style.color = uic.getBlackUIFontColor();
-
-      const removeTaskBtn = utils.createEl(
+      const projectDiv = utils.createEl("div", null, "project-div");
+      const projectNameDiv = utils.createEl("div", null, "project-name-div");
+      const removeProjectBtn = utils.createEl(
         "button",
         null,
-        "remove-task-button",
+        "remove-project",
         "✖"
       );
-      removeTaskBtn.style.color = uic.getBlackUIFontColor();
 
-      taskMain.appendChild(removeTaskBtn);
-      taskMain.appendChild(taskTitle);
-      taskMain.appendChild(taskDesc);
-      taskSub.appendChild(taskDate);
-      taskSub.appendChild(taskPriority);
-      taskSub.appendChild(taskStatus);
-      taskMain.appendChild(taskSub);
-      tasksDiv.appendChild(taskMain);
+      projectNameDiv.style.backgroundColor = uic.tp();
+      projectNameDiv.style.color = uic.getBlackUIFontColor();
+
+      projectNameDiv.textContent = project.getName();
+      projectDiv.setAttribute("data-project", project.getName());
+
+      removeProjectBtn.style.color = uic.getBlackUIFontColor();
+      removeProjectBtn.style.background = uic.tp();
+
+      projectDiv.appendChild(projectNameDiv);
+      projectDiv.appendChild(removeProjectBtn);
+      projectsDiv.appendChild(projectDiv);
     });
-    utils.addBtn(tasksDiv, "add-new-task", uic.getBlackUIFontColor());
+    utils.addBtn(
+      projectsDiv,
+      "add-new-project-button",
+      uic.getBlackUIFontColor()
+    );
+  };
+
+  const renderTasks = () => {
+    const tasksDiv = document.querySelector("#tasks");
+
+    tasksDiv.style.opacity = "0";
+    tasksDiv.style.transition = "opacity 0.3s ease-in-out";
+
+    setTimeout(() => {
+      tasksDiv.innerHTML = "";
+
+      const activeProj = getActiveProject();
+      if (!activeProj) return;
+      const project = PM().getProject(activeProj);
+
+      const tasks = project.getTasks();
+
+      Object.values(tasks).forEach((task) => {
+        const taskMain = utils.taskMaker(tasksDiv);
+        const taskTitle = utils.createEl(
+          "h3",
+          null,
+          "task-headline",
+          task.title
+        );
+        const taskDescription = utils.createEl(
+          "p",
+          null,
+          "task-description",
+          task.description
+        );
+        taskTitle.style.color = uic.getBlackUIFontColor();
+        taskDescription.style.color = uic.getBlackUIFontColor();
+
+        utils.taskDetailsDivider(
+          taskDescription,
+          uic.getBlackUIFontColor(),
+          uic.tp()
+        );
+        const taskSub = utils.createEl("div", null, "task-sub");
+        const formattedDate = format(parseISO(task.dueDate), "do MMMM yyyy");
+        const taskDate = utils.createEl(
+          "p",
+          null,
+          "task-due-date",
+          `Due: ${formattedDate}`
+        );
+        taskDate.style.color = uic.getBlackUIFontColor();
+        const taskPriority = utils.createEl(
+          "p",
+          null,
+          "task-priority",
+          `Priority: ${task.priority}`
+        );
+        taskPriority.style.color = uic.getBlackUIFontColor();
+
+        const taskStatus = utils.createEl(
+          "p",
+          null,
+          "task-status",
+          `Status: ${task.status}`
+        );
+        taskStatus.style.color = uic.getBlackUIFontColor();
+
+        const removeTaskBtn = utils.createEl(
+          "button",
+          null,
+          "remove-task-button",
+          "✖"
+        );
+        removeTaskBtn.style.color = uic.getBlackUIFontColor();
+
+        taskMain.appendChild(removeTaskBtn);
+        taskMain.appendChild(taskTitle);
+        taskMain.appendChild(taskDescription);
+        taskSub.appendChild(taskDate);
+        taskSub.appendChild(taskPriority);
+        taskSub.appendChild(taskStatus);
+        taskMain.appendChild(taskSub);
+        tasksDiv.appendChild(taskMain);
+      });
+      utils.addBtn(tasksDiv, "add-new-task-button", uic.getBlackUIFontColor());
+      setTimeout(() => {
+        tasksDiv.style.opacity = "1";
+        utils.reapplyListeners();
+      }, 10);
+    }, 300);
   };
   initUI();
   renderProjects();
-  renderDefaultTasks();
+  renderTasks();
+
   return {
     getActiveProject,
     setActiveProject,
     renderProjects,
-    renderDefaultTasks,
+    renderTasks,
   };
-})();
+};
 
 export { UI, UIColor };
