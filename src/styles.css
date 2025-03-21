@@ -1,3 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&display=swap');
+
+.agdasima-regular {
+  font-family: "Agdasima", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.agdasima-bold {
+  font-family: "Agdasima", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
 /* Reset */
 *,
 *::before,
@@ -24,8 +38,10 @@ body {
 }
 
 button {
+  font-family: "Agdasima";
   cursor: pointer;
   border: none;
+  background: none;
   text-align: left;
   transition: transform 0.3s ease-in-out;
   will-change: transform;
@@ -41,8 +57,22 @@ select {
   padding: 5px;
 }
 
+h2,
+h3,
+p,
+.project-name-div,
+label,
+button {
+  color: rgba(245, 240, 230, 0.9);
+}
+
 #container {
   display: grid;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(40, 40, 40, 0.9)
+  );
   grid-template-columns: 1fr 2fr 1fr;
   grid-template-rows: auto 1fr;
   height: 100vh;
@@ -56,6 +86,8 @@ select {
 
 #logo {
   position: absolute;
+  filter: invert(92%) sepia(8%) saturate(142%) hue-rotate(18deg) brightness(97%)
+    contrast(91%);
   top: 2%;
   left: 2%;
   width: 100px;
@@ -96,8 +128,14 @@ select {
   cursor: pointer;
 }
 
+.project-div.active {
+  font-weight: bold;
+  transform: translate(5px);
+  transition: all 0.3s ease-in-out;
+}
+
 .project-name-div {
-  width: 90%;
+  width: 85%;
   transition: transform 0.3s ease-in-out;
 }
 
@@ -131,11 +169,37 @@ select {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.4);
   border-radius: 10px;
   opacity: 0.1;
   mix-blend-mode: overlay;
   z-index: -1;
+  box-shadow: 7px 7px 7px 1px;
+}
+
+.task-main.high::before {
+  background: #ff0606;
+}
+
+.task-main.medium::before {
+  background: #ffc107;
+}
+
+.task-main.low::before {
+  background: #26a69a;
+}
+
+.task-main.finished {
+  filter: blur(1px);
+  color: #888;
+  text-decoration: line-through;
+}
+
+.task-main.finished::before {
+  background: #222;
+  border-radius: 10px; 
+  opacity: 0.6;
+  transition: opacity 0.3s ease-in-out;
+  box-shadow: 0 0 8px #49e786;
 }
 
 .task-main:hover {
@@ -153,29 +217,31 @@ select {
   padding: 5px;
 }
 
-
-#task-modal, #confirm-remove-task-modal, #project-modal {
+#task-modal,
+#confirm-remove-task-modal,
+#project-modal {
   position: fixed;
   padding: 10px;
   top: 50%;
   left: 50%;
   width: auto;
-  background: rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(40, 40, 40, 1));
   transform: translate(-50%, -50%);
   gap: 15px;
   border-radius: 8px;
-  border: none;
-  backdrop-filter: blur(1px);
+  border: none; 
 }
 
-#task-form, #project-form {
+#task-form,
+#project-form {
   display: flex;
   flex-direction: column;
   padding: 25px;
   gap: 15px;
 }
 
-#task-form label, #project-form label {
+#task-form label,
+#project-form label {
   display: block;
   font-weight: bold;
 }
@@ -185,8 +251,7 @@ select {
 #task-form select,
 #project-form input,
 #project-form textarea,
-#project-form select
- {
+#project-form select {
   width: 100%;
 }
 
@@ -195,7 +260,8 @@ select {
   min-height: 80px;
 }
 
-.close-modal-button, .remove-task-button {
+.close-modal-button,
+.remove-task-button {
   padding: 5px;
   position: absolute;
   top: 10px;
@@ -205,7 +271,9 @@ select {
   cursor: pointer;
 }
 
-#save-task-button, #confirm-remove-button, #save-project-button {
+#save-task-button,
+#confirm-remove-button,
+#save-project-button {
   padding: 5px;
   background: none;
   border: none;
