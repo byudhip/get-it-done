@@ -89,11 +89,20 @@ select {
   z-index: -1;
 }
 
-.project-button {
-  display: block;
-  padding: 5px;
-  width: 80%;
+.project-div {
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.project-name-div {
+  width: 90%;
+  transition: transform 0.3s ease-in-out;
+}
+
+.project-name-div:hover {
+  transform: scale(1.01);
 }
 
 .add-new-project {
@@ -103,6 +112,8 @@ select {
 #tasks {
   min-height: 80vh;
   padding: 10px;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .task-main {
@@ -184,7 +195,7 @@ select {
   min-height: 80px;
 }
 
-#close-modal-button, .remove-task-button {
+.close-modal-button, .remove-task-button {
   padding: 5px;
   position: absolute;
   top: 10px;
