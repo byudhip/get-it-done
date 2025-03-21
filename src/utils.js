@@ -1,6 +1,6 @@
 import PM from "./projectmanager.js";
-import { UIColor, UI } from "./ui.js";
-import { format, parse, parseISO } from "date-fns";
+import { UI } from "./ui.js";
+import { addDays, format, parse, parseISO } from "date-fns";
 
 const ui = UI();
 
@@ -20,7 +20,7 @@ function createEl(tag, id = null, className = null, textContent = null) {
   return element;
 }
 
-function addBtn(element, className, fontColor) {
+function addBtn(element, className) {
   const button = createEl(
     "button",
     null,
@@ -29,12 +29,10 @@ function addBtn(element, className, fontColor) {
   );
   button.style.width = "100%";
   button.style.marginTop = "5px";
-  button.style.backgroundColor = "transparent";
-  button.style.color = fontColor;
   element.appendChild(button);
 }
 
-function addRightBorder(element, gradient1, gradient2) {
+function addRightBorder(element) {
   element.style.position = "relative";
 
   let border = createEl("div");
@@ -44,13 +42,20 @@ function addRightBorder(element, gradient1, gradient2) {
   border.style.bottom = "1%";
   border.style.right = "0";
   border.style.width = "1px";
-  border.style.background = `linear-gradient(to bottom, ${gradient1}, ${gradient2})`;
+  border.style.background = `linear-gradient(to bottom,  rgba(245, 240, 230, 0.9), transparent)`;
 
   element.appendChild(border);
 }
 
-function taskMaker(element) {
+function taskMaker(element, priority, status) {
   const taskMain = createEl("div", null, "task-main");
+  taskMain.classList.add(priority === "High" ? "high" : priority === "Medium" ? "medium" : "low");
+  if (status === "Finished") {
+    taskMain.classList.remove("high");
+    taskMain.classList.remove("medium");
+    taskMain.classList.remove("low");
+    taskMain.classList.add("finished");
+  }
   taskMain.style.position = "relative";
   taskMain.style.zIndex = "0";
 
@@ -59,7 +64,7 @@ function taskMaker(element) {
   return taskMain;
 }
 
-function taskDetailsDivider(element, gradient1, gradient2) {
+function taskDetailsDivider(element) {
   element.style.position = "relative";
 
   let border = createEl("div");
@@ -69,7 +74,7 @@ function taskDetailsDivider(element, gradient1, gradient2) {
   border.style.bottom = "0";
   border.style.right = "0";
   border.style.height = "1px";
-  border.style.background = `linear-gradient(to right, ${gradient1}, ${gradient2}`;
+  border.style.background = `linear-gradient(to right, rgba(245, 240, 230, 0.9), transparent)`;
 
   element.appendChild(border);
 }
@@ -82,7 +87,6 @@ function newProjectModal() {
 
   const nameLabel = createEl("label", null, null, "Name");
   nameLabel.setAttribute("for", "project-name");
-  nameLabel.style.color = UIColor().getBlackUIFontColor();
 
   const nameInput = createEl("input", "project-name");
   nameInput.setAttribute("type", "text");
@@ -92,28 +96,7 @@ function newProjectModal() {
   nameInput.required = true;
 
   nameLabel.appendChild(nameInput);
-
-  const colorLabel = createEl("label", null, null, "Name");
-  colorLabel.setAttribute("for", "project-color");
-  colorLabel.style.color = UIColor().getBlackUIFontColor();
-
-  const selectColor = createEl("select", "project-color");
-  const colorOptions = [
-    "Black",
-    "Burgundy",
-    "Dark Green",
-    "Deep Blue",
-    "Burnt Orange",
-  ];
-
-  for (let option of colorOptions) {
-    const choice = createEl("option");
-    choice.value = option;
-    choice.textContent = option;
-    selectColor.appendChild(choice);
-  }
-
-  colorLabel.appendChild(selectColor);
+  nameLabel.classList.add("agdasima-regular");
 
   const saveProjectBtn = createEl(
     "button",
@@ -121,19 +104,21 @@ function newProjectModal() {
     null,
     "Save"
   );
-  saveProjectBtn.style.color = UIColor().getBlackUIFontColor();
-  saveProjectBtn.addEventListener("click", () => {
-    PM().addNewProject(nameInput.value, selectColor.value);
+  saveProjectBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (!nameInput.value.trim()) {
+      nameInput.reportValidity();
+      return;
+    }
+    PM().addNewProject(nameInput.value);
     ui.renderProjects();
     ui.renderTasks();
     modal.close();
   });
 
   const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
-  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
 
   form.appendChild(nameLabel);
-  form.appendChild(colorLabel);
   form.appendChild(saveProjectBtn);
   form.appendChild(closeModalBtn);
   modal.appendChild(form);
@@ -142,13 +127,24 @@ function newProjectModal() {
   return modal;
 }
 
+function captureProjectDetails(projectDiv) {
+  return {
+    projectDiv,
+    currentName: taskDiv.querySelector(".project-name-div").textContent
+  };
+}
+
+function editProjectModal() {
+
+}
+
 function newTaskModal() {
   const body = document.querySelector("body");
   const modal = createEl("dialog", "task-modal");
   const form = createEl("form", "task-form");
   form.setAttribute("action", "");
 
-  const titleLabel = createEl("label", null, null, "Title");
+  const titleLabel = createEl("label", null, null, "Title (required)");
   titleLabel.setAttribute("for", "task-title");
 
   const titleInput = createEl("input", "task-title");
@@ -160,7 +156,7 @@ function newTaskModal() {
 
   titleLabel.appendChild(titleInput);
 
-  const descriptionLabel = createEl("label", null, null, "Description");
+  const descriptionLabel = createEl("label", null, null, "Description (required)");
   descriptionLabel.setAttribute("for", "task-description");
 
   const descriptionInput = createEl("textarea", "task-description");
@@ -214,8 +210,15 @@ function newTaskModal() {
   statusLabel.appendChild(selectStatus);
 
   const saveTaskBtn = createEl("button", "save-task-button", null, "Save");
-  saveTaskBtn.style.color = UIColor().getBlackUIFontColor();
-  saveTaskBtn.addEventListener("click", () => {
+  saveTaskBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    if (!titleInput.value.trim() || !descriptionInput.value.trim() || 
+    !dueDateInput.value || !selectPriority.value || !selectStatus) {
+      titleInput.reportValidity();
+      return;
+    }
+
     PM().newTask(ui.getActiveProject(), {
       title: titleInput.value,
       description: descriptionInput.value,
@@ -224,10 +227,10 @@ function newTaskModal() {
       status: selectStatus.value,
     });
     ui.renderTasks();
+    modal.close();
   });
 
   const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
-  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
 
   form.appendChild(titleLabel);
   form.appendChild(descriptionLabel);
@@ -242,12 +245,12 @@ function newTaskModal() {
 
   const labels = document.querySelectorAll("label");
   for (let label of labels) {
-    label.style.color = UIColor().getBlackUIFontColor();
+    label.classList.add("agdasima-regular");
   }
   return modal;
 }
 
-function captureDetails(taskDiv) {
+function captureTaskDetails(taskDiv) {
   const originalDate = taskDiv
     .querySelector(".task-due-date")
     .textContent.slice(5); //Original String eg "12th May 2024"
@@ -296,7 +299,8 @@ function editTaskModal() {
   const selectPriority = document.querySelector("#task-priority");
   const selectStatus = document.querySelector("#task-status");
   const saveTaskBtn = document.querySelector("#save-task-button");
-  saveTaskBtn.addEventListener("click", () => {
+  saveTaskBtn.addEventListener("click", (e) => {
+    e.preventDefault();
     PM().changeTaskTitle(
       ui.getActiveProject(),
       modal.dataset.currentTitle,
@@ -340,14 +344,14 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
     "confirm-text",
     `Remove [${currentTitle}] task?`
   );
-  confirmText.style.color = UIColor().getBlackUIFontColor();
+
   const confirmRemoveBtn = createEl(
     "button",
     "confirm-remove-button",
     null,
     "Yes"
   );
-  confirmRemoveBtn.style.color = UIColor().getBlackUIFontColor();
+
   confirmRemoveBtn.addEventListener("click", (e) => {
     e.preventDefault();
     taskDiv.remove();
@@ -357,7 +361,6 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
   });
 
   const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
-  closeModalBtn.style.color = UIColor().getBlackUIFontColor();
 
   form.appendChild(confirmText);
   form.appendChild(confirmRemoveBtn);
@@ -376,18 +379,20 @@ function reapplyListeners() {
   const projectDivs = document.querySelectorAll(".project-div");
 
   newTaskBtn.addEventListener("click", () => {
+    const tentativeDueDate = addDays(new Date(), 1);
+    const formattedDate = format(tentativeDueDate, "yyyy-MM-dd");
     document.querySelector("#task-title").value = "";
     document.querySelector("#task-description").value = "";
-    document.querySelector("#task-due-date").value = "";
-    document.querySelector("#task-priority").value = "";
-    document.querySelector("#task-status").value = "";
+    document.querySelector("#task-due-date").value = formattedDate;
+    document.querySelector("#task-priority").value = "Low";
+    document.querySelector("#task-status").value = "Not started";
     taskModal.showModal();
   });
 
   tasksDiv.forEach((task) => {
     task.addEventListener("click", (e) => {
       const taskDiv = e.target.closest(".task-main");
-      const taskDetails = captureDetails(taskDiv);
+      const taskDetails = captureTaskDetails(taskDiv);
       console.log("Task div:", taskDiv, ", Clicked element:", e.target);
       if (e.target.matches(".remove-task-button")) {
         confirmRemoveTaskModal(taskDetails).showModal();
@@ -435,7 +440,7 @@ export {
   addRightBorder,
   newProjectModal,
   newTaskModal,
-  captureDetails,
+  captureTaskDetails,
   openEditTaskModal,
   editTaskModal,
   confirmRemoveTaskModal,
