@@ -1,4 +1,5 @@
-function Project(name, initialTasks = {}) {
+function Project(initialName, initialTasks = {}) {
+  let name = initialName;
   const tasks = { ...initialTasks };
 
   const getName = () => name;
