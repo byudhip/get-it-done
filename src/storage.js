@@ -3,7 +3,9 @@ const saveToStorage = (key, data) => {
 };
 
 const loadFromStorage = (key) => {
-  return JSON.parse(localStorage.getItem(key)) || [];
+  const data = JSON.parse(localStorage.getItem(key)) || [];
+  console.log(`Loading from storage (${key}):`, data);
+  return data;
 };
 
 export { saveToStorage, loadFromStorage };
