@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&display=swap");
 
 .agdasima-regular {
   font-family: "Agdasima", sans-serif;
@@ -34,12 +34,12 @@ textarea {
 /* end of reset */
 
 body {
-  font-family: Helvetica, Arial, system-ui;
-  height: 100vh;
   line-height: 1.5;
 }
 
 button {
+  font-family: "Agdasima";
+  font-weight: bold;
   cursor: pointer;
   border: none;
   background: none;
@@ -76,7 +76,7 @@ button {
   );
   grid-template-columns: 1fr 2fr 1fr;
   grid-template-rows: auto 1fr;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 #header {
@@ -102,7 +102,7 @@ button {
 
 #projects {
   position: relative;
-  min-height: 80vh;
+  /* min-height: 80vh; */
   padding: 10px;
   margin: 0 10px;
   z-index: 0;
@@ -124,7 +124,9 @@ button {
 
 .project-div {
   display: flex;
+  padding: 10px;
   justify-content: space-between;
+  border-radius: 5px;
   margin-bottom: 10px;
   cursor: pointer;
 }
@@ -132,9 +134,12 @@ button {
 .project-div.active {
   font-weight: bold;
   transform: translate(5px);
+  background-color: rgba(245, 240, 230, 0.9);
   transition: all 0.3s ease-in-out;
 }
-
+.project-div.active * {
+  color: rgba(0, 0, 0, 0.9);
+}
 .project-name-div {
   width: 85%;
   transition: transform 0.3s ease-in-out;
@@ -149,7 +154,7 @@ button {
 }
 
 #tasks {
-  min-height: 80vh;
+  /* min-height: 80vh; */
   padding: 10px;
   opacity: 1;
   /* transition: opacity 0.3s ease-in-out; */
@@ -197,7 +202,7 @@ button {
 
 .task-main.finished::before {
   background: #222;
-  border-radius: 10px; 
+  border-radius: 10px;
   opacity: 0.6;
   transition: opacity 0.3s ease-in-out;
   box-shadow: 0 0 8px #49e786;
@@ -227,13 +232,18 @@ button {
   top: 50%;
   left: 50%;
   width: auto;
+  font-size: 1.3rem;
   background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(40, 40, 40, 1));
   transform: translate(-50%, -50%);
   gap: 15px;
   border-radius: 8px;
-  border: none; 
+  border: none;
   opacity: 1;
   transition: opacity 0.3s ease-in-out;
+}
+
+.to-bold {
+  font-weight: bold;
 }
 
 #task-form,
@@ -276,7 +286,8 @@ button {
 }
 
 #save-task-button,
-#confirm-remove-button,
+#confirm-remove-project-button,
+#confirm-remove-task-button,
 #save-project-button {
   padding: 5px;
   background: none;
@@ -290,7 +301,7 @@ button {
 
 #due-dates {
   position: relative;
-  min-height: 80vh;
+  min-height: 10vh;
   padding: 10px;
   z-index: 0;
 }
