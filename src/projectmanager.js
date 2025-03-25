@@ -4,17 +4,20 @@ import { addDays } from "date-fns";
 
 function ProjectManager() {
   const storageKey = "projects";
-
-  const projects = loadFromStorage(storageKey).map((p) => p.name ? Project(p.name, p.tasks) : p);
-  console.log("Projects after loading:", projects);
+  const activeProjectKey = "activeProject";
+  let activeProject = loadFromStorage(activeProjectKey) || projects[0].getName(); // to prevent activeProject from resetting
+  const projects = loadFromStorage(storageKey).map((p) =>
+    Project(p.name, p.tasks)
+  );
 
   const saveProjects = () => {
-    const plainProjects = projects.map(p => ({
+    const plainProjects = projects.map((p) => ({
       name: p.getName(),
       tasks: p.getTasks(),
     }));
-    saveToStorage(storageKey, plainProjects)};
-  
+    saveToStorage(activeProjectKey, activeProject);
+    saveToStorage(storageKey, plainProjects);
+  };
 
   const addNewProject = (name) => {
     for (let project of projects) {
@@ -23,18 +26,37 @@ function ProjectManager() {
         return;
       }
     }
-    const newProject = Project(name);
+    const newProject = Project(name, {});
     projects.push(newProject);
     saveProjects();
   };
 
   const renameProject = (name, newName) => {
-    const project = getProject(name);
-    if (!project) {
+    console.log(
+      "current projects: ",
+      projects.map((p) => p.getName())
+    );
+    console.log("Looking for project: ", name);
+    const projectIndex = projects.findIndex((p) => p.getName() === name);
+
+    if (projectIndex === -1) {
       console.log("No such project!");
       return;
     }
-    project.setName(newName);
+    if (
+      projects.some((p) => {
+        p.getName() === newName;
+      })
+    ) {
+      console.warn(`Project name [${newName}] already exists!`);
+      return;
+    }
+    projects.push(Project(newName, projects[projectIndex].getTasks()));
+    console.log(`Renamed project: ${name} => ${newName}`);
+    console.log(
+      "After renaming:",
+      projects.map((p) => p.getName())
+    );
     saveProjects();
   };
 
@@ -44,7 +66,7 @@ function ProjectManager() {
     const project = projects.find((project) => project.getName() === name);
     if (!project) {
       console.log("No such project!");
-      return;
+      return null;
     }
     return project;
   };
@@ -100,7 +122,7 @@ function ProjectManager() {
   const changeTaskStatus = (projectName, taskTitle, newPriority) => {
     const project = getProject(projectName);
     project.setPriority(taskTitle, newPriority);
-  }
+  };
   if (projects.length === 0) {
     addNewProject("Home");
     const dueDate = addDays(new Date(), 7);
@@ -112,6 +134,66 @@ function ProjectManager() {
       status: "Ongoing",
     });
   }
+
+  const setActiveProject = (newProject) => {
+    console.trace(`Switching active project to ${newProject}`);
+    console.log(
+      "Current projects: ",
+      projects.map((p) => p.getName())
+    );
+    const projectDivs = document.querySelectorAll(".project-div");
+    projectDivs.forEach((project) => {
+      project.classList.remove("active");
+    });
+
+    const projectNames = projects.map((p) => p.getName());
+    if (projectNames.includes(newProject)) {
+      activeProject = newProject;
+      saveProjects(); // save activeProject value to localStorage for later use
+    } else {
+      console.warn(
+        `Project "${newProject}" does not exist! Keeping current project.`
+      );
+      return;
+    }
+
+    const newActiveProject = document.querySelector(
+      `[data-project="${activeProject}"]`
+    );
+    if (newActiveProject) {
+      newActiveProject.classList.add("active");
+    } else {
+      console.warn(`Project ${activeProject} not found in UI!`);
+    }
+  };
+  const getActiveProject = () => {
+    
+    console.trace("getActiveProject() called. Current:", activeProject);
+    const projectNames = projects.map((p) => p.getName());
+    console.log("Available projects:", projectNames);
+    if (!projectNames.includes(activeProject)) {
+      console.log(`Active project [${activeProject}] not found`)
+    }
+    return projectNames.includes(activeProject)
+      ? activeProject
+      : projects[0].getName();
+  };
+
+  const setActiveProjectToDefault = () => {
+    activeProject = projects.length > 0 ? projects[0].getName() : null;
+    const newActiveProject = document.querySelector(
+      `[data-project="${activeProject}"]`
+    );
+    newActiveProject.classList.add("active");
+  };
+  const setActiveProjectToNew = () => {
+    activeProject =
+      projects.length > 0 ? projects[projects.length - 1].getName() : null;
+    const newActiveProject = document.querySelector(
+      `[data-project="${activeProject}"]`
+    );
+    newActiveProject.classList.add("active");
+  };
   return {
     saveProjects,
     addNewProject,
@@ -126,6 +208,10 @@ function ProjectManager() {
     changeTaskDueDate,
     changeTaskPriority,
     changeTaskStatus,
+    setActiveProject,
+    getActiveProject,
+    setActiveProjectToDefault,
+    setActiveProjectToNew,
     allProjectsStr,
   };
 }
