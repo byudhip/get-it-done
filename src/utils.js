@@ -27,6 +27,7 @@ function addBtn(element, className) {
     className,
     `${className === "add-new-task-button" ? "New Task" : " New Project"}`
   );
+  button.classList.add("agdasima-regular");
   button.style.width = "100%";
   button.style.marginTop = "5px";
   element.appendChild(button);
@@ -49,7 +50,9 @@ function addRightBorder(element) {
 
 function taskMaker(element, priority, status) {
   const taskMain = createEl("div", null, "task-main");
-  taskMain.classList.add(priority === "High" ? "high" : priority === "Medium" ? "medium" : "low");
+  taskMain.classList.add(
+    priority === "High" ? "high" : priority === "Medium" ? "medium" : "low"
+  );
   if (status === "Finished") {
     taskMain.classList.remove("high");
     taskMain.classList.remove("medium");
@@ -79,16 +82,46 @@ function taskDetailsDivider(element) {
   element.appendChild(border);
 }
 
+function captureProjectDetails(projectDiv) {
+  return {
+    projectDiv,
+    currentName: projectDiv.querySelector(".project-name-div").textContent,
+  };
+}
+
+function openEditProjectModal({ currentName }) {
+  const modal = document.querySelector("#project-modal");
+  modal.querySelector("#project-name-input").value = currentName;
+
+  modal.dataset.currentName = currentName;
+  modal.dataset.isNew = "false";
+  modal.style.opacity = "0";
+  modal.showModal();
+  setTimeout(() => {
+    setTimeout(() => {
+      modal.style.opacity = "1";
+    }, 10);
+  }, 100);
+}
+
 function newProjectModal() {
   const body = document.querySelector("body");
   const modal = createEl("dialog", "project-modal");
   const form = createEl("form", "project-form");
   form.setAttribute("action", "");
 
-  const nameLabel = createEl("label", null, null, "Name");
-  nameLabel.setAttribute("for", "project-name");
+  const modalHeadline = createEl(
+    "h3",
+    "project-modal-headline",
+    null,
+    "Project Editor"
+  );
+  modalHeadline.classList.add("agdasima-bold");
 
-  const nameInput = createEl("input", "project-name");
+  const nameLabel = createEl("label", null, null, "Name");
+  nameLabel.setAttribute("for", "project-name-input");
+
+  const nameInput = createEl("input", "project-name-input");
   nameInput.setAttribute("type", "text");
   nameInput.setAttribute("name", "project-name");
   nameInput.setAttribute("max-length", "25");
@@ -104,38 +137,45 @@ function newProjectModal() {
     null,
     "Save"
   );
+  let isNew = modal.dataset.isNew = "true";
   saveProjectBtn.addEventListener("click", (e) => {
     e.preventDefault();
     if (!nameInput.value.trim()) {
       nameInput.reportValidity();
-      return;
     }
-    PM().addNewProject(nameInput.value);
-    ui.renderProjects();
-    ui.renderTasks();
-    modal.close();
+    if (isNew) {
+      PM().addNewProject(nameInput.value);
+      ui.renderProjects();
+      setTimeout(() => {
+        PM().setActiveProject(nameInput.value);
+        ui.renderTasks();
+      }, 310);
+      console.log("isNew variant executed!");
+      modal.close();
+    } else if (isNew === false) {
+      PM().renameProject(currentName, nameInput.value);
+      ui.renderProjects();
+      setTimeout(() => {
+        PM().setActiveProject(nameInput.value);
+        ui.renderTasks();
+      }, 50);
+      console.log("!isNew variant executed!");
+      modal.close();
+    }
   });
 
   const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
+  closeModalBtn.setAttribute("type", "button");
 
+  form.appendChild(modalHeadline);
   form.appendChild(nameLabel);
   form.appendChild(saveProjectBtn);
-  form.appendChild(closeModalBtn);
+
   modal.appendChild(form);
+  modal.appendChild(closeModalBtn);
   body.appendChild(modal);
 
   return modal;
-}
-
-function captureProjectDetails(projectDiv) {
-  return {
-    projectDiv,
-    currentName: taskDiv.querySelector(".project-name-div").textContent
-  };
-}
-
-function editProjectModal() {
-
 }
 
 function newTaskModal() {
@@ -144,6 +184,13 @@ function newTaskModal() {
   const form = createEl("form", "task-form");
   form.setAttribute("action", "");
 
+  const modalHeadline = createEl(
+    "h3",
+    "task-modal-headline",
+    null,
+    "Task Editor"
+  );
+  modalHeadline.classList.add("agdasima-bold");
   const titleLabel = createEl("label", null, null, "Title (required)");
   titleLabel.setAttribute("for", "task-title");
 
@@ -156,7 +203,12 @@ function newTaskModal() {
 
   titleLabel.appendChild(titleInput);
 
-  const descriptionLabel = createEl("label", null, null, "Description (required)");
+  const descriptionLabel = createEl(
+    "label",
+    null,
+    null,
+    "Description (required)"
+  );
   descriptionLabel.setAttribute("for", "task-description");
 
   const descriptionInput = createEl("textarea", "task-description");
@@ -213,13 +265,18 @@ function newTaskModal() {
   saveTaskBtn.addEventListener("click", (e) => {
     e.preventDefault();
 
-    if (!titleInput.value.trim() || !descriptionInput.value.trim() || 
-    !dueDateInput.value || !selectPriority.value || !selectStatus) {
+    if (
+      !titleInput.value.trim() ||
+      !descriptionInput.value.trim() ||
+      !dueDateInput.value ||
+      !selectPriority.value ||
+      !selectStatus
+    ) {
       titleInput.reportValidity();
       return;
     }
 
-    PM().newTask(ui.getActiveProject(), {
+    PM().newTask(PM().getActiveProject(), {
       title: titleInput.value,
       description: descriptionInput.value,
       dueDate: dueDateInput.value,
@@ -232,6 +289,7 @@ function newTaskModal() {
 
   const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
 
+  form.appendChild(modalHeadline);
   form.appendChild(titleLabel);
   form.appendChild(descriptionLabel);
   form.appendChild(dueDateLabel);
@@ -287,8 +345,13 @@ function openEditTaskModal({
   modal.querySelector("#task-status").value = currentStatus;
 
   modal.dataset.currentTitle = currentTitle;
-
-  modal.showModal();
+  modal.style.opacity = "0";
+  setTimeout(() => {
+    modal.showModal();
+    setTimeout(() => {
+      modal.style.opacity = "1";
+    }, 10);
+  }, 100);
 }
 
 function editTaskModal() {
@@ -302,27 +365,27 @@ function editTaskModal() {
   saveTaskBtn.addEventListener("click", (e) => {
     e.preventDefault();
     PM().changeTaskTitle(
-      ui.getActiveProject(),
+      PM().getActiveProject(),
       modal.dataset.currentTitle,
       titleInput.value
     );
     PM().changeTaskDescription(
-      ui.getActiveProject(),
+      PM().getActiveProject(),
       modal.dataset.currentTitle,
       descriptionInput.value
     );
     PM().changeTaskDueDate(
-      ui.getActiveProject(),
+      PM().getActiveProject(),
       modal.dataset.currentTitle,
       dueDateInput.value
     );
     PM().changeTaskPriority(
-      ui.getActiveProject(),
+      PM().getActiveProject(),
       modal.dataset.currentTitle,
       selectPriority.value
     );
     PM().changeTaskStatus(
-      ui.getActiveProject(),
+      PM().getActiveProject(),
       modal.dataset.currentTitle,
       selectStatus.value
     );
@@ -331,10 +394,15 @@ function editTaskModal() {
   return modal;
 }
 
-function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
+function confirmRemoveProjectModal({ projectDiv, currentName }) {
   const body = document.querySelector("body");
-  const modal = createEl("dialog", "confirm-remove-task-modal");
-  const form = createEl("form", "confirm-form");
+  let modal = document.querySelector("#confirm-remove-project-modal");
+  if (!modal) {
+    modal = createEl("dialog", "confirm-remove-project-modal");
+    body.appendChild(modal);
+  }
+  modal.innerHTML = "";
+  const form = createEl("form", "confirm-remove-project-form");
   modal.appendChild(form);
   body.appendChild(modal);
 
@@ -342,20 +410,22 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
     "p",
     null,
     "confirm-text",
-    `Remove [${currentTitle}] task?`
+    `Remove Project [${currentName}]?`
   );
 
   const confirmRemoveBtn = createEl(
     "button",
-    "confirm-remove-button",
+    "confirm-remove-project-button",
     null,
     "Yes"
   );
 
   confirmRemoveBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    taskDiv.remove();
-    PM().removeTask(ui.getActiveProject(), currentTitle);
+    projectDiv.remove();
+    PM().deleteProject(currentName);
+    ui.renderProjects();
+    PM().setActiveProjectToDefault();
     ui.renderTasks();
     modal.close();
   });
@@ -366,17 +436,72 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
   form.appendChild(confirmRemoveBtn);
   modal.appendChild(closeModalBtn);
 
-  return modal;
+  if (!modal.open) {
+    modal.style.opacity = "0";
+    setTimeout(() => {
+      modal.showModal();
+      setTimeout(() => {
+        modal.style.opacity = "1";
+      }, 10);
+    }, 100);
+  } else {
+    console.warn("Modal is already open!");
+  }
+}
+
+function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
+  const body = document.querySelector("body");
+  const modal = createEl("dialog", "confirm-remove-task-modal");
+  const form = createEl("form", "confirm-remove-task-form");
+  modal.appendChild(form);
+  body.appendChild(modal);
+
+  const confirmText = createEl(
+    "p",
+    null,
+    "confirm-text",
+    `Remove [${currentTitle}] task from Project [${PM().getActiveProject()}]?`
+  );
+
+  const confirmRemoveBtn = createEl(
+    "button",
+    "confirm-remove-task-button",
+    null,
+    "Yes"
+  );
+
+  confirmRemoveBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    taskDiv.remove();
+    PM().removeTask(PM().getActiveProject(), currentTitle);
+    ui.renderTasks();
+    modal.close();
+  });
+
+  const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
+
+  form.appendChild(confirmText);
+  form.appendChild(confirmRemoveBtn);
+  modal.appendChild(closeModalBtn);
+
+  if (!modal.open) {
+    modal.style.opacity = "0";
+    setTimeout(() => {
+      modal.showModal();
+      setTimeout(() => {
+        modal.style.opacity = "1";
+      }, 10);
+    }, 100);
+  } else {
+    console.warn("Modal is already open!");
+  }
 }
 
 function reapplyListeners() {
   const newTaskBtn = document.querySelector(".add-new-task-button");
-  const newProjectBtn = document.querySelector(".add-new-project-button");
   const taskModal = document.querySelector("#task-modal");
-  const projectModal = document.querySelector("#project-modal");
-
+  const projects = document.querySelector("#projects");
   const tasksDiv = document.querySelectorAll(".task-main");
-  const projectDivs = document.querySelectorAll(".project-div");
 
   newTaskBtn.addEventListener("click", () => {
     const tentativeDueDate = addDays(new Date(), 1);
@@ -386,7 +511,13 @@ function reapplyListeners() {
     document.querySelector("#task-due-date").value = formattedDate;
     document.querySelector("#task-priority").value = "Low";
     document.querySelector("#task-status").value = "Not started";
-    taskModal.showModal();
+    taskModal.style.opacity = "0";
+    setTimeout(() => {
+      taskModal.showModal();
+      setTimeout(() => {
+        taskModal.style.opacity = "1";
+      }, 10);
+    }, 100);
   });
 
   tasksDiv.forEach((task) => {
@@ -395,37 +526,67 @@ function reapplyListeners() {
       const taskDetails = captureTaskDetails(taskDiv);
       console.log("Task div:", taskDiv, ", Clicked element:", e.target);
       if (e.target.matches(".remove-task-button")) {
-        confirmRemoveTaskModal(taskDetails).showModal();
+        confirmRemoveTaskModal(taskDetails);
       } else {
         openEditTaskModal(taskDetails);
       }
     });
   });
 
-  newProjectBtn.addEventListener("click", () => {
-    projectModal.showModal();
-  });
-
-  projectDivs.forEach((div) => {
-    div.addEventListener("click", (e) => {
-      const projectDiv = e.target.closest(".project-div");
-      const newProject = projectDiv.dataset.project;
-      if (newProject !== ui.getActiveProject()) {
-        ui.setActiveProject(newProject);
-        console.log("Active project: ", ui.getActiveProject());
+  projects.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (e.target.matches(".add-new-project-button")) {
+      const projectModal = document.querySelector("#project-modal");
+      const nameInput = document.querySelector("#project-name-input");
+      nameInput.value = "New project";
+      console.log("Adding a new project");
+      projectModal.style.opacity = "0";
+      setTimeout(() => {
+        projectModal.showModal();
+        setTimeout(() => {
+          projectModal.style.opacity = "1";
+        }, 10);
+      }, 100);
+      return;
+    }
+    const projectDiv = e.target.closest(".project-div");
+    const newProject = captureProjectDetails(projectDiv);
+    const projectName = projectDiv.dataset.project;
+     if (e.target.matches(".edit-project-button")) {
+      openEditProjectModal(newProject);
+    } else if (e.target.matches(".remove-project-button")) {
+      confirmRemoveProjectModal(newProject);
+    } else if (e.target.matches(".project-name-div")) {
+      PM().setActiveProject(projectName);
+      if (!window.renderTasksRunning) {
+        // Prevent multiple executions
+        window.renderTasksRunning = true;
+        console.log("Calling renderTasks() from utils.js...");
         ui.renderTasks();
+        setTimeout(() => {
+          window.renderTasksRunning = false;
+        }, 100); // Reset flag
       }
-    });
+    }
   });
 
   document.addEventListener("click", (e) => {
     if (e.target.matches(".close-modal-button")) {
       const modal = e.target.closest("dialog");
-      if (modal && modal.id === "confirm-remove-task-modal") {
-        modal.close();
-        modal.remove();
+      if (
+        (modal && modal.id === "confirm-remove-task-modal") ||
+        modal.id === "confirm-remove-project-modal"
+      ) {
+        modal.style.opacity = "0";
+        setTimeout(() => {
+          modal.close();
+          modal.remove();
+        }, 100);
       } else {
-        modal.close();
+        modal.style.opacity = "0";
+        setTimeout(() => {
+          modal.close();
+        }, 300);
       }
     }
   });
@@ -439,6 +600,7 @@ export {
   taskDetailsDivider,
   addRightBorder,
   newProjectModal,
+  captureProjectDetails,
   newTaskModal,
   captureTaskDetails,
   openEditTaskModal,
