@@ -32,7 +32,7 @@ function ProjectManager() {
   };
 
   const renameProject = (name, newName) => {
-    console.log(
+    console.warn(
       "current projects: ",
       projects.map((p) => p.getName())
     );
@@ -51,9 +51,9 @@ function ProjectManager() {
       console.warn(`Project name [${newName}] already exists!`);
       return;
     }
-    projects.push(Project(newName, projects[projectIndex].getTasks()));
-    console.log(`Renamed project: ${name} => ${newName}`);
-    console.log(
+    projects[projectIndex].setName(newName);
+    console.warn(`Renamed project: ${name} => ${newName}`);
+    console.warn(
       "After renaming:",
       projects.map((p) => p.getName())
     );
