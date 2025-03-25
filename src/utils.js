@@ -90,11 +90,12 @@ function captureProjectDetails(projectDiv) {
 }
 
 function openEditProjectModal({ currentName }) {
-  const modal = document.querySelector("#project-modal");
+  const modal = newProjectModal();
   modal.querySelector("#project-name-input").value = currentName;
 
   modal.dataset.currentName = currentName;
-  modal.dataset.isNew = "false";
+  console.log("Send current project name: ", currentName);
+  modal.dataset.isNew = false;
   modal.style.opacity = "0";
   modal.showModal();
   setTimeout(() => {
@@ -105,76 +106,82 @@ function openEditProjectModal({ currentName }) {
 }
 
 function newProjectModal() {
-  const body = document.querySelector("body");
-  const modal = createEl("dialog", "project-modal");
-  const form = createEl("form", "project-form");
-  form.setAttribute("action", "");
+  let modal = document.querySelector("#project-modal");
+  
+  if (!modal) {
+    const body = document.querySelector("body");
+    modal = createEl("dialog", "project-modal");
+    const form = createEl("form", "project-form");
+    form.setAttribute("action", "");
 
-  const modalHeadline = createEl(
-    "h3",
-    "project-modal-headline",
-    null,
-    "Project Editor"
-  );
-  modalHeadline.classList.add("agdasima-bold");
+    const modalHeadline = createEl(
+      "h3",
+      "project-modal-headline",
+      null,
+      "Project Editor"
+    );
+    modalHeadline.classList.add("agdasima-bold");
+    const nameLabel = createEl("label", null, null, "Name");
+    nameLabel.setAttribute("for", "project-name-input");
+    
+    const nameInput = createEl("input", "project-name-input");
+    nameInput.setAttribute("type", "text");
+    nameInput.setAttribute("name", "project-name");
+    nameInput.setAttribute("max-length", "25");
+    nameInput.setAttribute("placeholder", "Unicorn");
+    nameInput.required = true;
 
-  const nameLabel = createEl("label", null, null, "Name");
-  nameLabel.setAttribute("for", "project-name-input");
+    nameLabel.appendChild(nameInput);
+    nameLabel.classList.add("agdasima-regular");
 
-  const nameInput = createEl("input", "project-name-input");
-  nameInput.setAttribute("type", "text");
-  nameInput.setAttribute("name", "project-name");
-  nameInput.setAttribute("max-length", "25");
-  nameInput.setAttribute("placeholder", "Unicorn");
-  nameInput.required = true;
+    const saveProjectBtn = createEl(
+      "button",
+      "save-project-button",
+      null,
+      "Save"
+    );
+    
+    saveProjectBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      console.log(modal.dataset.isNew);
+      if (!nameInput.value.trim()) {
+        nameInput.reportValidity();
+        return;
+      }
+      if (modal.dataset.isNew === "true") {
+        PM().addNewProject(nameInput.value);
+        ui.renderProjects();
+        setTimeout(() => {
+          PM().setActiveProject(nameInput.value);
+          ui.renderTasks();
+        }, 310);
+        console.log("isNew variant executed!");
+        modal.close();
+      } else if (modal.dataset.isNew === "false") {
+        console.log("!isNew variant started!");
+        console.log("Current project name is: ", modal.dataset.currentName);
+        PM().renameProject(modal.dataset.currentName, nameInput.value);
+        ui.renderProjects();
+        setTimeout(() => {
+          PM().setActiveProject(nameInput.value);
+          ui.renderTasks();
+        }, 50);
+        console.log("!isNew variant executed!");
+        modal.close();
+      }
+    });
 
-  nameLabel.appendChild(nameInput);
-  nameLabel.classList.add("agdasima-regular");
+    const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
+    closeModalBtn.setAttribute("type", "button");
 
-  const saveProjectBtn = createEl(
-    "button",
-    "save-project-button",
-    null,
-    "Save"
-  );
-  let isNew = modal.dataset.isNew = "true";
-  saveProjectBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    if (!nameInput.value.trim()) {
-      nameInput.reportValidity();
-    }
-    if (isNew) {
-      PM().addNewProject(nameInput.value);
-      ui.renderProjects();
-      setTimeout(() => {
-        PM().setActiveProject(nameInput.value);
-        ui.renderTasks();
-      }, 310);
-      console.log("isNew variant executed!");
-      modal.close();
-    } else if (isNew === false) {
-      PM().renameProject(currentName, nameInput.value);
-      ui.renderProjects();
-      setTimeout(() => {
-        PM().setActiveProject(nameInput.value);
-        ui.renderTasks();
-      }, 50);
-      console.log("!isNew variant executed!");
-      modal.close();
-    }
-  });
+    form.appendChild(modalHeadline);
+    form.appendChild(nameLabel);
+    form.appendChild(saveProjectBtn);
 
-  const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
-  closeModalBtn.setAttribute("type", "button");
-
-  form.appendChild(modalHeadline);
-  form.appendChild(nameLabel);
-  form.appendChild(saveProjectBtn);
-
-  modal.appendChild(form);
-  modal.appendChild(closeModalBtn);
-  body.appendChild(modal);
-
+    modal.appendChild(form);
+    modal.appendChild(closeModalBtn);
+    body.appendChild(modal);
+  }
   return modal;
 }
 
@@ -541,6 +548,7 @@ function reapplyListeners() {
       nameInput.value = "New project";
       console.log("Adding a new project");
       projectModal.style.opacity = "0";
+      projectModal.dataset.isNew = true;
       setTimeout(() => {
         projectModal.showModal();
         setTimeout(() => {
@@ -550,9 +558,10 @@ function reapplyListeners() {
       return;
     }
     const projectDiv = e.target.closest(".project-div");
+    if (!projectDiv) return;
     const newProject = captureProjectDetails(projectDiv);
     const projectName = projectDiv.dataset.project;
-     if (e.target.matches(".edit-project-button")) {
+    if (e.target.matches(".edit-project-button")) {
       openEditProjectModal(newProject);
     } else if (e.target.matches(".remove-project-button")) {
       confirmRemoveProjectModal(newProject);
