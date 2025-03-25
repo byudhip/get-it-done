@@ -1,10 +1,9 @@
 import "./styles.css";
-import ProjectManager from "./projectmanager.js";
+import PM from "./projectmanager.js";
 import * as utils from "./utils.js";
 import {UI} from "./ui.js";
 
-const pm = ProjectManager();
+const pm = PM();
 
 utils.newTaskModal();
 utils.newProjectModal();
-
