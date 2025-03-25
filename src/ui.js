@@ -104,8 +104,10 @@ const UI = () => {
       projectsDiv.appendChild(projectDiv);
     });
     utils.addBtn(projectsDiv, "add-new-project-button");
-    console.log("Active project BEFORE exiting renderProjects():", PM().getActiveProject());
-    
+    console.log(
+      "Active project BEFORE exiting renderProjects():",
+      PM().getActiveProject()
+    );
   };
 
   const renderTasks = () => {
@@ -136,7 +138,7 @@ const UI = () => {
           "task-headline",
           task.title
         );
-        taskTitle.classList.add("agdasima-regular");
+        taskTitle.classList.add("agdasima-bold");
         const taskDescription = utils.createEl(
           "p",
           null,
@@ -193,6 +195,7 @@ const UI = () => {
       }, 10);
     }, 300);
   };
+  const renderDueDates = () => {};
   initUI();
   renderProjects();
   renderTasks();
