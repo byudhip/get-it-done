@@ -21,7 +21,7 @@ function ProjectManager() {
 
   const addNewProject = (name) => {
     for (let project of projects) {
-      if (project.getName() === name) {
+      if (project.getName().toLowerCase() === name.toLowerCase()) {
         console.log("project name exists!");
         return;
       }
@@ -45,7 +45,7 @@ function ProjectManager() {
     }
     if (
       projects.some((p) => {
-        p.getName() === newName;
+        p.getName().toLowerCase() === newName.toLowerCase();
       })
     ) {
       console.warn(`Project name [${newName}] already exists!`);
@@ -72,7 +72,7 @@ function ProjectManager() {
   };
 
   const deleteProject = (name) => {
-    const index = projects.findIndex((project) => project.getName() === name);
+    const index = projects.findIndex((project) => project.getName().toLowerCase() === name.toLowerCase());
     if (index === -1) {
       console.log("No such project!");
       return;
@@ -125,12 +125,42 @@ function ProjectManager() {
   };
   if (projects.length === 0) {
     addNewProject("Home");
-    const dueDate = addDays(new Date(), 7);
+
+    const dueDate1 = addDays(new Date(), 2);
+    const dueDate2 = addDays(new Date(), 5);
+    const dueDate3 = addDays(new Date(), 7);
+    const dueDate4 = addDays(new Date(), 11);
+    const dueDate5 = addDays(new Date(), 12);
+
     newTask("Home", {
       title: "Welcome to Get it Done!",
       description: "We will help you manage your projects and their tasks!",
-      dueDate: dueDate,
+      dueDate: dueDate1,
       priority: "High",
+      status: "Ongoing",
+    });
+
+    newTask("Home", {
+      title: "Set up your first project",
+      description: "Click the [New project] button to add a new project.",
+      dueDate: dueDate2,
+      priority: "Medium",
+      status: "Not started",
+    });
+
+    newTask("Home", {
+      title: "Create your first task",
+      description: "Click on [New task] button and add a task for your current active project.",
+      dueDate: dueDate3,
+      priority: "Low",
+      status: "Not started",
+    });
+
+    newTask("Home", {
+      title: "Mark tasks as completed",
+      description: "Click on a task and update its status to Finished.",
+      dueDate: dueDate4,
+      priority: "Medium",
       status: "Ongoing",
     });
   }
