@@ -21,6 +21,9 @@ function Project(initialName, initialTasks = {}) {
     if (!tasks[taskTitle]) {
       console.log("No such task!");
       return;
+    } else if (tasks[taskTitle].toLowerCase() === newTitle.toLowerCase()) {
+      console.log("Duplicate task title!");
+      return;
     }
     const task = tasks[taskTitle];
     delete tasks[taskTitle];
