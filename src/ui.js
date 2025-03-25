@@ -7,38 +7,6 @@ const assets = utils.getImages(
 );
 
 const UI = () => {
-  const projects = PM().getAllProjects();
-  let activeProject = projects.length > 0 ? projects[0].getName() : null;
-  const setActiveProject = (newProject) => {
-    if (newProject === activeProject) return;
-    const projectDivs = document.querySelectorAll(".project-div");
-    projectDivs.forEach((project) => {
-      project.classList.remove("active");
-    });
-
-    const projectNames = projects.map((p) => p.getName());
-    if (projectNames.includes(newProject)) {
-      activeProject = newProject;
-    } else {
-      activeProject = projects.length > 0 ? projects[0].getName() : null;
-    }
-
-    const newActiveProject = document.querySelector(
-      `[data-project="${activeProject}"]`
-    );
-    if (newActiveProject) {
-      newActiveProject.classList.add("active");
-    }
-  };
-  const getActiveProject = () => {
-    const projectNames = projects.map((p) => p.getName());
-    return projectNames.includes(activeProject)
-      ? activeProject
-      : projects.length > 0
-      ? projects[0].getName()
-      : null;
-  };
-
   const initUI = () => {
     const body = document.querySelector("body");
     const container = utils.createEl("div", "container");
@@ -97,13 +65,22 @@ const UI = () => {
   };
 
   const renderProjects = () => {
+    console.log("renderProjects() is running...");
     const projectsDiv = document.querySelector("#projects");
+    if (!projectsDiv) {
+      console.error("Error: #projects div not found!");
+      return;
+    }
     projectsDiv.innerHTML = "";
 
     const projects = PM().getAllProjects();
+    console.log("Projects received from PM():", projects);
 
     projects.forEach((project) => {
+      console.log("Rendering project:", project.getName());
       const projectDiv = utils.createEl("div", null, "project-div");
+      projectDiv.classList.remove("active");
+      projectDiv.classList.add("agdasima-regular");
       const projectNameDiv = utils.createEl("div", null, "project-name-div");
       const editProjectBtn = utils.createEl(
         "button",
@@ -127,23 +104,29 @@ const UI = () => {
       projectsDiv.appendChild(projectDiv);
     });
     utils.addBtn(projectsDiv, "add-new-project-button");
+    console.log("Active project BEFORE exiting renderProjects():", PM().getActiveProject());
     
   };
 
   const renderTasks = () => {
+    console.trace("renderTasks() is running...");
     const tasksDiv = document.querySelector("#tasks");
-
     tasksDiv.style.opacity = "0";
     tasksDiv.style.transition = "opacity 0.3s ease-in-out";
 
     setTimeout(() => {
       tasksDiv.innerHTML = "";
-
-      const activeProj = getActiveProject();
-      if (!activeProj) return;
+      const activeProj = PM().getActiveProject();
+      console.log("Expected active project:", activeProj);
+      if (!activeProj) {
+        console.warn("No active project set! Tasks will not render");
+        return;
+      }
       const project = PM().getProject(activeProj);
+      console.log("Project found for tasks:", project);
 
       const tasks = project.getTasks();
+      console.log("Tasks received:", tasks);
 
       Object.values(tasks).forEach((task) => {
         const taskMain = utils.taskMaker(tasksDiv, task.priority, task.status);
@@ -214,12 +197,10 @@ const UI = () => {
   renderProjects();
   renderTasks();
   const activeProjectDiv = document.querySelector(
-    `[data-project="${activeProject}"]`
+    `[data-project="${PM().getActiveProject()}"]`
   );
   activeProjectDiv.classList.add("active");
   return {
-    getActiveProject,
-    setActiveProject,
     renderProjects,
     renderTasks,
   };
