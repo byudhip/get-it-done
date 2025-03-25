@@ -82,6 +82,23 @@ function taskDetailsDivider(element) {
   element.appendChild(border);
 }
 
+function inputClean(input, maxlength = 25) {
+  const trimmed = input.trim();
+  const escaped = trimmed.replace(
+    /[&<>"']/g,
+    (match) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[match])
+  );
+  const limited = escaped.slice(0, maxlength);
+  return { trimmed, escaped, limited };
+}
+
 function captureProjectDetails(projectDiv) {
   return {
     projectDiv,
@@ -93,8 +110,8 @@ function openEditProjectModal({ currentName }) {
   const modal = newProjectModal();
   modal.querySelector("#project-name-input").value = currentName;
 
-  modal.dataset.currentName = currentName;
-  console.log("Send current project name: ", currentName);
+  modal.dataset.currentName = currentName; // important, rename function will not work without this.
+  console.trace("Send current project name: ", currentName);
   modal.dataset.isNew = false;
   modal.style.opacity = "0";
   modal.showModal();
@@ -107,7 +124,7 @@ function openEditProjectModal({ currentName }) {
 
 function newProjectModal() {
   let modal = document.querySelector("#project-modal");
-  
+
   if (!modal) {
     const body = document.querySelector("body");
     modal = createEl("dialog", "project-modal");
@@ -123,7 +140,7 @@ function newProjectModal() {
     modalHeadline.classList.add("agdasima-bold");
     const nameLabel = createEl("label", null, null, "Name");
     nameLabel.setAttribute("for", "project-name-input");
-    
+
     const nameInput = createEl("input", "project-name-input");
     nameInput.setAttribute("type", "text");
     nameInput.setAttribute("name", "project-name");
@@ -140,19 +157,20 @@ function newProjectModal() {
       null,
       "Save"
     );
-    
+
     saveProjectBtn.addEventListener("click", (e) => {
       e.preventDefault();
+      const cleaned = inputClean(nameInput.value);
       console.log(modal.dataset.isNew);
-      if (!nameInput.value.trim()) {
+      if (!cleaned.trimmed) {
         nameInput.reportValidity();
         return;
       }
       if (modal.dataset.isNew === "true") {
-        PM().addNewProject(nameInput.value);
+        PM().addNewProject(cleaned.limited);
         ui.renderProjects();
         setTimeout(() => {
-          PM().setActiveProject(nameInput.value);
+          PM().setActiveProject(cleaned.limited);
           ui.renderTasks();
         }, 310);
         console.log("isNew variant executed!");
@@ -160,10 +178,10 @@ function newProjectModal() {
       } else if (modal.dataset.isNew === "false") {
         console.log("!isNew variant started!");
         console.log("Current project name is: ", modal.dataset.currentName);
-        PM().renameProject(modal.dataset.currentName, nameInput.value);
+        PM().renameProject(modal.dataset.currentName, cleaned.limited);
         ui.renderProjects();
         setTimeout(() => {
-          PM().setActiveProject(nameInput.value);
+          PM().setActiveProject(cleaned.limited);
           ui.renderTasks();
         }, 50);
         console.log("!isNew variant executed!");
@@ -271,10 +289,14 @@ function newTaskModal() {
   const saveTaskBtn = createEl("button", "save-task-button", null, "Save");
   saveTaskBtn.addEventListener("click", (e) => {
     e.preventDefault();
+    const cleanTitle = inputClean(titleInput.value);
+    const cleanTitleFinal = cleanTitle.limited;
+    const cleanDescription = inputClean(descriptionInput.value);
+    const cleanDescFinal = cleanDescription.escaped;
 
     if (
-      !titleInput.value.trim() ||
-      !descriptionInput.value.trim() ||
+      !cleanTitleFinal ||
+      !cleanDescFinal ||
       !dueDateInput.value ||
       !selectPriority.value ||
       !selectStatus
@@ -284,8 +306,8 @@ function newTaskModal() {
     }
 
     PM().newTask(PM().getActiveProject(), {
-      title: titleInput.value,
-      description: descriptionInput.value,
+      title: cleanTitleFinal,
+      description: cleanDescFinal,
       dueDate: dueDateInput.value,
       priority: selectPriority.value,
       status: selectStatus.value,
@@ -374,12 +396,12 @@ function editTaskModal() {
     PM().changeTaskTitle(
       PM().getActiveProject(),
       modal.dataset.currentTitle,
-      titleInput.value
+      inputClean(titleInput.value).limited
     );
     PM().changeTaskDescription(
       PM().getActiveProject(),
       modal.dataset.currentTitle,
-      descriptionInput.value
+      inputClean(descriptionInput.value).escaped
     );
     PM().changeTaskDueDate(
       PM().getActiveProject(),
@@ -417,9 +439,8 @@ function confirmRemoveProjectModal({ projectDiv, currentName }) {
     "p",
     null,
     "confirm-text",
-    `Remove Project [${currentName}]?`
   );
-
+  confirmText.innerHTML = `Remove Project <span class="to-bold">[${currentName}]</span>?`
   const confirmRemoveBtn = createEl(
     "button",
     "confirm-remove-project-button",
@@ -467,8 +488,8 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
     "p",
     null,
     "confirm-text",
-    `Remove [${currentTitle}] task from Project [${PM().getActiveProject()}]?`
   );
+  confirmText.innerHTML = `Remove <span class="to-bold">[${currentTitle}]</span> task from Project <span class="to-bold">[${PM().getActiveProject()}]</span>?`
 
   const confirmRemoveBtn = createEl(
     "button",
