@@ -52,23 +52,23 @@ const UI = () => {
     const rightSidebarDiv = utils.createEl("div", "right-sidebar");
     container.appendChild(rightSidebarDiv);
 
-    const dueHeadline = utils.createEl(
+    const projectDetailsHeadline = utils.createEl(
       "h2",
       null,
       "section-headline",
-      "Upcoming Due"
+      "Project Details"
     );
-    dueHeadline.classList.add("agdasima-bold");
-    const dueDiv = utils.createEl("div", "due-dates", null);
-    rightSidebarDiv.appendChild(dueHeadline);
-    rightSidebarDiv.appendChild(dueDiv);
+    projectDetailsHeadline.classList.add("agdasima-bold");
+    const projectDetailsDiv = utils.createEl("div", "project-details", null);
+    rightSidebarDiv.appendChild(projectDetailsHeadline);
+    rightSidebarDiv.appendChild(projectDetailsDiv);
   };
 
   const renderProjects = () => {
-    console.log("renderProjects() is running...");
+    // console.log("renderProjects() is running...");
     const projectsDiv = document.querySelector("#projects");
     if (!projectsDiv) {
-      console.error("Error: #projects div not found!");
+      // console.error("Error: #projects div not found!");
       return;
     }
     projectsDiv.innerHTML = "";
@@ -77,7 +77,7 @@ const UI = () => {
     console.log("Projects received from PM():", projects);
 
     projects.forEach((project) => {
-      console.log("Rendering project:", project.getName());
+      // console.log("Rendering project:", project.getName());
       const projectDiv = utils.createEl("div", null, "project-div");
       projectDiv.classList.remove("active");
       projectDiv.classList.add("agdasima-regular");
@@ -92,7 +92,7 @@ const UI = () => {
         "button",
         null,
         "remove-project-button",
-        "✖"
+        "X"
       );
 
       projectNameDiv.textContent = project.getName();
@@ -104,14 +104,14 @@ const UI = () => {
       projectsDiv.appendChild(projectDiv);
     });
     utils.addBtn(projectsDiv, "add-new-project-button");
-    console.log(
-      "Active project BEFORE exiting renderProjects():",
-      PM().getActiveProject()
-    );
+    // console.log(
+    //   "Active project BEFORE exiting renderProjects():",
+    //   PM().getActiveProject()
+    // );
   };
 
   const renderTasks = () => {
-    console.trace("renderTasks() is running...");
+    // console.trace("renderTasks() is running...");
     const tasksDiv = document.querySelector("#tasks");
     tasksDiv.style.opacity = "0";
     tasksDiv.style.transition = "opacity 0.3s ease-in-out";
@@ -119,16 +119,16 @@ const UI = () => {
     setTimeout(() => {
       tasksDiv.innerHTML = "";
       const activeProj = PM().getActiveProject();
-      console.log("Expected active project:", activeProj);
+      // console.log("Expected active project:", activeProj);
       if (!activeProj) {
-        console.warn("No active project set! Tasks will not render");
+        // console.warn("No active project set! Tasks will not render");
         return;
       }
       const project = PM().getProject(activeProj);
-      console.log("Project found for tasks:", project);
+      // console.log("Project found for tasks:", project);
 
       const tasks = project.getTasks();
-      console.log("Tasks received:", tasks);
+      // console.log("Tasks received:", tasks);
 
       Object.values(tasks).forEach((task) => {
         const taskMain = utils.taskMaker(tasksDiv, task.priority, task.status);
@@ -176,7 +176,7 @@ const UI = () => {
           "button",
           null,
           "remove-task-button",
-          "✖"
+          "X"
         );
 
         taskMain.appendChild(removeTaskBtn);
@@ -195,14 +195,78 @@ const UI = () => {
       }, 10);
     }, 300);
   };
-  const renderDueDates = () => {};
+  const renderProjectDetails = () => {
+    const projectDtDiv = document.querySelector("#project-details");
+    projectDtDiv.style.opacity = "0";
+    projectDtDiv.style.transition = "opacity 0.3s ease-in-out";
+
+    setTimeout(() => {
+      projectDtDiv.innerHTML = "";
+      const activeProj = PM().getActiveProject();
+
+      if (!activeProj) {
+        console.warn("active project is empty!");
+        return;
+      }
+      
+      
+      const project = PM().getProject(activeProj);
+      console.log("getProjectDueDate() result:", project.getProjectDueDate());
+      console.log("Active project:", activeProj);
+      console.log("Project object:", project);
+      console.log(
+        "Stored projectDueDate (direct access):",
+        project.projectDueDate
+      );
+      const about = project.getAbout();
+      const projectDate = project.getProjectDueDate();
+      console.log("project due date: ", projectDate);
+      const formattedDate = format(parseISO(projectDate), "do MMMM yyyy");
+
+      const aboutHeadline = utils.createEl(
+        "h2",
+        "project-about-headline",
+        null,
+        "About"
+      );
+      aboutHeadline.classList.add("agdasima-bold");
+      const aboutText = utils.createEl("p", "project-about-text", null, about);
+      aboutText.classList.add("agdasima-regular");
+
+      const dateHeadline = utils.createEl(
+        "h2",
+        "project-due-date-headline",
+        null,
+        "Project Due"
+      );
+      dateHeadline.classList.add("agdasima-bold");
+      const dateText = utils.createEl(
+        "h2",
+        "project-due-date-text",
+        null,
+        formattedDate
+      );
+      dateText.classList.add("agdasima-regular");
+
+      projectDtDiv.appendChild(aboutHeadline);
+      projectDtDiv.appendChild(aboutText);
+      projectDtDiv.appendChild(dateHeadline);
+      projectDtDiv.appendChild(dateText);
+      setTimeout(() => {
+        projectDtDiv.style.opacity = "1";
+        utils.reapplyListeners();
+      }, 10);
+    }, 300);
+  };
   initUI();
   renderProjects();
   renderTasks();
   const activeProjectDiv = document.querySelector(
     `[data-project="${PM().getActiveProject()}"]`
   );
+  console.log("active project: ", activeProjectDiv);
   activeProjectDiv.classList.add("active");
+  renderProjectDetails();
   return {
     renderProjects,
     renderTasks,
