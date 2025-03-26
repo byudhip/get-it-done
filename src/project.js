@@ -1,12 +1,23 @@
-function Project(initialName, initialTasks = {}) {
+function Project(initialName, initialAbout, initialProjectDueDate, initialTasks = {}) {
   let name = initialName;
+  let projectAbout = initialAbout;
+  let projectDueDate = initialProjectDueDate;
   const tasks = { ...initialTasks };
 
   const getName = () => name;
+  const getAbout = () => projectAbout;
+  const getProjectDueDate = () => projectDueDate;
   const getTasks = () => tasks;
 
   const setName = (newName) => {
     name = newName;
+  };
+
+  const addDetails = (newAbout, newDate) => {
+    console.log(`Adding details: ${newAbout} & ${newDate} `);
+    projectAbout = newAbout;
+    projectDueDate = newDate;
+    console.log(`Current details: ${projectAbout} & ${projectDueDate} `);
   };
 
   const addTask = (taskDetails) => {
@@ -15,6 +26,18 @@ function Project(initialName, initialTasks = {}) {
     tasks[taskDetails.title] = { ...taskDetails };
     console.log("Current task: ", tasks);
   };
+
+  const setAbout = (newAbout) => {
+    console.log(`Old about: [${projectAbout}]`);
+    projectAbout = newAbout;
+    console.log(`New about: [${projectAbout}]`);
+  }
+
+  const setProjectDueDate = (updatedDate) => {
+    console.log(`Old deadline: ${details[name].projectDueDate}`);
+    projectDueDate = updatedDate;
+    console.log(`New deadline: ${projectDueDate}`);
+  }
 
   const setTitle = (taskTitle, newTitle) => {
     console.log(`Changing [${taskTitle}] task title to [${newTitle}]`);
@@ -79,8 +102,13 @@ function Project(initialName, initialTasks = {}) {
 
   return {
     getName,
+    getAbout,
+    getProjectDueDate,
     getTasks,
     setName,
+    setAbout,
+    setProjectDueDate,
+    addDetails,
     setTitle,
     setDescription,
     setPriority,

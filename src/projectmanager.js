@@ -4,15 +4,23 @@ import { addDays } from "date-fns";
 
 function ProjectManager() {
   const storageKey = "projects";
-  const activeProjectKey = "activeProject";
-  let activeProject = loadFromStorage(activeProjectKey) || projects[0].getName(); // to prevent activeProject from resetting
   const projects = loadFromStorage(storageKey).map((p) =>
-    Project(p.name, p.tasks)
+    Project(p.name, p.about, p.projectDueDate, p.tasks)
   );
+  const activeProjectKey = "activeProject";
+  let storedActiveProject = loadFromStorage(activeProjectKey);
+  let activeProject =
+    storedActiveProject && storedActiveProject.length > 0 // to prevent activeProject from resetting
+      ? storedActiveProject
+      : projects.length > 0
+      ? projects[0].getName()
+      : "Home";
 
   const saveProjects = () => {
     const plainProjects = projects.map((p) => ({
       name: p.getName(),
+      about: p.getAbout(),
+      projectDueDate: p.getProjectDueDate(),
       tasks: p.getTasks(),
     }));
     saveToStorage(activeProjectKey, activeProject);
@@ -22,7 +30,7 @@ function ProjectManager() {
   const addNewProject = (name) => {
     for (let project of projects) {
       if (project.getName().toLowerCase() === name.toLowerCase()) {
-        console.log("project name exists!");
+        // console.log("project name exists!");
         return;
       }
     }
@@ -32,15 +40,15 @@ function ProjectManager() {
   };
 
   const renameProject = (name, newName) => {
-    console.warn(
-      "current projects: ",
-      projects.map((p) => p.getName())
-    );
-    console.log("Looking for project: ", name);
+    // console.warn(
+    //   "current projects: ",
+    //   projects.map((p) => p.getName())
+    // );
+    // console.log("Looking for project: ", name);
     const projectIndex = projects.findIndex((p) => p.getName() === name);
 
     if (projectIndex === -1) {
-      console.log("No such project!");
+      // console.log("No such project!");
       return;
     }
     if (
@@ -48,15 +56,15 @@ function ProjectManager() {
         p.getName().toLowerCase() === newName.toLowerCase();
       })
     ) {
-      console.warn(`Project name [${newName}] already exists!`);
+      // console.warn(`Project name [${newName}] already exists!`);
       return;
     }
     projects[projectIndex].setName(newName);
-    console.warn(`Renamed project: ${name} => ${newName}`);
-    console.warn(
-      "After renaming:",
-      projects.map((p) => p.getName())
-    );
+    // console.warn(`Renamed project: ${name} => ${newName}`);
+    // console.warn(
+    //   "After renaming:",
+    //   projects.map((p) => p.getName())
+    // );
     saveProjects();
   };
 
@@ -65,16 +73,32 @@ function ProjectManager() {
   const getProject = (name) => {
     const project = projects.find((project) => project.getName() === name);
     if (!project) {
-      console.log("No such project!");
+      // console.log("No such project!");
       return null;
     }
     return project;
   };
+  const newProjectDetails = (projectName, projectAbout, projectDate) => {
+    const project = getProject(projectName);
+    project.addDetails(projectAbout, projectDate);
+  };
+
+  const changeProjectAbout = (projectName, projectAbout) => {
+    const project = getProject(projectName);
+    project.setAbout(projectAbout);
+  };
+
+  const changeProjectDueDate = (projectName, projectDueDate) => {
+    const project = getProject(projectName);
+    project.setProjectDueDate(projectDueDate);
+  };
 
   const deleteProject = (name) => {
-    const index = projects.findIndex((project) => project.getName().toLowerCase() === name.toLowerCase());
+    const index = projects.findIndex(
+      (project) => project.getName().toLowerCase() === name.toLowerCase()
+    );
     if (index === -1) {
-      console.log("No such project!");
+      // console.log("No such project!");
       return;
     }
     projects.splice(index, 1);
@@ -123,54 +147,13 @@ function ProjectManager() {
     const project = getProject(projectName);
     project.setPriority(taskTitle, newPriority);
   };
-  if (projects.length === 0) {
-    addNewProject("Home");
-
-    const dueDate1 = addDays(new Date(), 2);
-    const dueDate2 = addDays(new Date(), 5);
-    const dueDate3 = addDays(new Date(), 7);
-    const dueDate4 = addDays(new Date(), 11);
-    const dueDate5 = addDays(new Date(), 12);
-
-    newTask("Home", {
-      title: "Welcome to Get it Done!",
-      description: "We will help you manage your projects and their tasks!",
-      dueDate: dueDate1,
-      priority: "High",
-      status: "Ongoing",
-    });
-
-    newTask("Home", {
-      title: "Set up your first project",
-      description: "Click the [New project] button to add a new project.",
-      dueDate: dueDate2,
-      priority: "Medium",
-      status: "Not started",
-    });
-
-    newTask("Home", {
-      title: "Create your first task",
-      description: "Click on [New task] button and add a task for your current active project.",
-      dueDate: dueDate3,
-      priority: "Low",
-      status: "Not started",
-    });
-
-    newTask("Home", {
-      title: "Mark tasks as completed",
-      description: "Click on a task and update its status to Finished.",
-      dueDate: dueDate4,
-      priority: "Medium",
-      status: "Ongoing",
-    });
-  }
 
   const setActiveProject = (newProject) => {
-    console.trace(`Switching active project to ${newProject}`);
-    console.log(
-      "Current projects: ",
-      projects.map((p) => p.getName())
-    );
+    // console.trace(`Switching active project to ${newProject}`);
+    // console.log(
+    //   "Current projects: ",
+    //   projects.map((p) => p.getName())
+    // );
     const projectDivs = document.querySelectorAll(".project-div");
     projectDivs.forEach((project) => {
       project.classList.remove("active");
@@ -181,9 +164,9 @@ function ProjectManager() {
       activeProject = newProject;
       saveProjects(); // save activeProject value to localStorage for later use
     } else {
-      console.warn(
-        `Project "${newProject}" does not exist! Keeping current project.`
-      );
+      // console.warn(
+      //   `Project "${newProject}" does not exist! Keeping current project.`
+      // );
       return;
     }
 
@@ -193,17 +176,16 @@ function ProjectManager() {
     if (newActiveProject) {
       newActiveProject.classList.add("active");
     } else {
-      console.warn(`Project ${activeProject} not found in UI!`);
+      // console.warn(`Project ${activeProject} not found in UI!`);
     }
   };
   const getActiveProject = () => {
-    
-    console.trace("getActiveProject() called. Current:", activeProject);
+    // console.trace("getActiveProject() called. Current:", activeProject);
     const projectNames = projects.map((p) => p.getName());
     console.log("Available projects:", projectNames);
-    if (!projectNames.includes(activeProject)) {
-      console.log(`Active project [${activeProject}] not found`)
-    }
+    // if (!projectNames.includes(activeProject)) {
+    //   console.log(`Active project [${activeProject}] not found`);
+    // }
     return projectNames.includes(activeProject)
       ? activeProject
       : projects[0].getName();
@@ -224,12 +206,63 @@ function ProjectManager() {
     );
     newActiveProject.classList.add("active");
   };
+
+  if (projects.length === 0) {
+    addNewProject("Home");
+
+    newProjectDetails(
+      "Home",
+      "Welcome to Get It Done! This is a default project set up to get you started. Click anywhere in this section to edit project details.",
+      addDays(new Date(), 30)
+    );
+
+    const dueDate1 = addDays(new Date(), 2);
+    const dueDate2 = addDays(new Date(), 5);
+    const dueDate3 = addDays(new Date(), 7);
+    const dueDate4 = new Date();
+
+    newTask("Home", {
+      title: "Welcome to Get it Done!",
+      description: "We will help you manage your projects and their tasks!",
+      dueDate: dueDate1,
+      priority: "High",
+      status: "Ongoing",
+    });
+
+    newTask("Home", {
+      title: "Set up your first project",
+      description: "Click the [New project] button to add a new project.",
+      dueDate: dueDate2,
+      priority: "Medium",
+      status: "Not started",
+    });
+
+    newTask("Home", {
+      title: "Create your first task",
+      description:
+        "Click on [New task] button and add a task for your current active project.",
+      dueDate: dueDate3,
+      priority: "Low",
+      status: "Not started",
+    });
+
+    newTask("Home", {
+      title: "Visit Get It Done!",
+      description: "Look around and get started with the app.",
+      dueDate: dueDate4,
+      priority: "Medium",
+      status: "Finished",
+    });
+  }
+
   return {
     saveProjects,
     addNewProject,
     renameProject,
     getAllProjects,
     getProject,
+    changeProjectAbout,
+    changeProjectDueDate,
     deleteProject,
     newTask,
     removeTask,
