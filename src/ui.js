@@ -191,7 +191,6 @@ const UI = () => {
       utils.addBtn(tasksDiv, "add-new-task-button");
       setTimeout(() => {
         tasksDiv.style.opacity = "1";
-        utils.reapplyListeners();
       }, 10);
     }, 300);
   };
@@ -208,19 +207,18 @@ const UI = () => {
         console.warn("active project is empty!");
         return;
       }
-      
-      
+
       const project = PM().getProject(activeProj);
-      console.log("getProjectDueDate() result:", project.getProjectDueDate());
-      console.log("Active project:", activeProj);
-      console.log("Project object:", project);
-      console.log(
-        "Stored projectDueDate (direct access):",
-        project.projectDueDate
-      );
+      // console.log("getProjectDueDate() result:", project.getProjectDueDate());
+      // console.log("Active project:", activeProj);
+      // console.log("Project object:", project);
+      // console.log(
+      //   "Stored projectDueDate (direct access):",
+      //   project.projectDueDate
+      // );
       const about = project.getAbout();
       const projectDate = project.getProjectDueDate();
-      console.log("project due date: ", projectDate);
+      // console.log("project due date: ", projectDate);
       const formattedDate = format(parseISO(projectDate), "do MMMM yyyy");
 
       const aboutHeadline = utils.createEl(
@@ -264,12 +262,13 @@ const UI = () => {
   const activeProjectDiv = document.querySelector(
     `[data-project="${PM().getActiveProject()}"]`
   );
-  console.log("active project: ", activeProjectDiv);
+  // console.log("active project: ", activeProjectDiv);
   activeProjectDiv.classList.add("active");
   renderProjectDetails();
   return {
     renderProjects,
     renderTasks,
+    renderProjectDetails
   };
 };
 

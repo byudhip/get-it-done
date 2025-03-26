@@ -96,19 +96,30 @@ function inputClean(input, maxlength = 25) {
       }[match])
   );
   const limited = escaped.slice(0, maxlength);
-  return { trimmed, escaped, limited };
+  const limitedLong = escaped.slice(0, 250);
+  return { trimmed, escaped, limited, limitedLong };
 }
 
 function captureProjectDetails(projectDiv) {
+  const currentName = projectDiv.querySelector(".project-name-div").textContent;
+  const project = PM().getProject(currentName);
+  const currentAbout = project.getAbout();
+  const originalDate = project.getProjectDueDate();
+  const currentDate = format(parseISO(originalDate), "yyyy-MM-dd");
+
   return {
     projectDiv,
-    currentName: projectDiv.querySelector(".project-name-div").textContent,
+    currentName,
+    currentAbout,
+    currentDate,
   };
 }
 
-function openEditProjectModal({ currentName }) {
+function openEditProjectModal({ currentName, currentAbout, currentDate }) {
   const modal = newProjectModal();
   modal.querySelector("#project-name-input").value = currentName;
+  modal.querySelector("#project-about-input").value = currentAbout;
+  modal.querySelector("#project-due-date-input").value = currentDate;
 
   modal.dataset.currentName = currentName; // important, rename function will not work without this.
   // console.trace("Send current project name: ", currentName);
@@ -145,11 +156,47 @@ function newProjectModal() {
     nameInput.setAttribute("type", "text");
     nameInput.setAttribute("name", "project-name");
     nameInput.setAttribute("max-length", "25");
-    nameInput.setAttribute("placeholder", "Unicorn");
+    nameInput.setAttribute("min-length", "5");
+    nameInput.setAttribute("placeholder", "Min 5 characters, max 25");
     nameInput.required = true;
 
     nameLabel.appendChild(nameInput);
     nameLabel.classList.add("agdasima-regular");
+
+    const aboutLabel = createEl(
+      "label",
+      null,
+      null,
+      "About Project (required)"
+    );
+    aboutLabel.setAttribute("for", "project-about-input");
+
+    const aboutInput = createEl("textarea", "project-about-input");
+    aboutInput.setAttribute("max-length", "250");
+    aboutInput.setAttribute("min-length", "20");
+    aboutInput.setAttribute(
+      "placeholder",
+      "Min 20 characters, max 250"
+    );
+    aboutInput.required = true;
+
+    aboutLabel.appendChild(aboutInput);
+    aboutLabel.classList.add("agdasima-regular");
+
+    const projectDueDateLabel = createEl(
+      "label",
+      null,
+      null,
+      "Project Due (required)"
+    );
+    projectDueDateLabel.setAttribute("for", "project-due-date-input");
+
+    const projectDueDateInput = createEl("input", "project-due-date-input");
+    projectDueDateInput.setAttribute("type", "date");
+    projectDueDateInput.setAttribute("name", "project-due-date");
+
+    projectDueDateLabel.appendChild(projectDueDateInput);
+    projectDueDateLabel.classList.add("agdasima-regular");
 
     const saveProjectBtn = createEl(
       "button",
@@ -160,29 +207,46 @@ function newProjectModal() {
 
     saveProjectBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      const cleaned = inputClean(nameInput.value);
+      const cleanedName = inputClean(nameInput.value);
+      const cleanedAbout = inputClean(aboutInput.value);
       // console.log(modal.dataset.isNew);
-      if (!cleaned.trimmed) {
+      if (cleanedName.limited.length < 5) {
         nameInput.reportValidity();
         return;
       }
+      if (cleanedAbout.limitedLong.length < 100) {
+        aboutInput.reportValidity();
+        return;
+      }
       if (modal.dataset.isNew === "true") {
-        PM().addNewProject(cleaned.limited);
+        // console.log("isNew variant started!");
+        PM().addNewProject(
+          cleanedName.limited,
+          cleanedAbout.limitedLong,
+          projectDueDateInput.value
+        );
         ui.renderProjects();
         setTimeout(() => {
-          PM().setActiveProject(cleaned.limited);
+          PM().setActiveProject(cleanedName.limited);
           ui.renderTasks();
-        }, 310);
+          ui.renderProjectDetails();
+        }, 50);
         // console.log("isNew variant executed!");
         modal.close();
       } else if (modal.dataset.isNew === "false") {
         // console.log("!isNew variant started!");
         // console.log("Current project name is: ", modal.dataset.currentName);
-        PM().renameProject(modal.dataset.currentName, cleaned.limited);
+        PM().renameProject(modal.dataset.currentName, cleanedName.limited);
+        PM().changeProjectAbout(cleanedName.limited, cleanedAbout.limitedLong);
+        PM().changeProjectDueDate(
+          cleanedName.limited,
+          projectDueDateInput.value
+        );
         ui.renderProjects();
         setTimeout(() => {
-          PM().setActiveProject(cleaned.limited);
+          PM().setActiveProject(cleanedName.limited);
           ui.renderTasks();
+          ui.renderProjectDetails();
         }, 50);
         // console.log("!isNew variant executed!");
         modal.close();
@@ -194,6 +258,8 @@ function newProjectModal() {
 
     form.appendChild(modalHeadline);
     form.appendChild(nameLabel);
+    form.appendChild(aboutLabel);
+    form.appendChild(projectDueDateLabel);
     form.appendChild(saveProjectBtn);
 
     modal.appendChild(form);
@@ -223,7 +289,8 @@ function newTaskModal() {
   titleInput.setAttribute("type", "text");
   titleInput.setAttribute("name", "task-title");
   titleInput.setAttribute("max-length", "25");
-  titleInput.setAttribute("placeholder", "Get Groceries");
+  titleInput.setAttribute("min-length", "5");
+  titleInput.setAttribute("placeholder", "Min 5 characters, max 25");
   titleInput.required = true;
 
   titleLabel.appendChild(titleInput);
@@ -238,9 +305,10 @@ function newTaskModal() {
 
   const descriptionInput = createEl("textarea", "task-description");
   descriptionInput.setAttribute("max-length", "250");
+  descriptionInput.setAttribute("min-length", "20");
   descriptionInput.setAttribute(
     "placeholder",
-    "Buy 3 dozen eggs, 14 liters of milk, 4 lbs of ham..."
+    "Min 20 characters, max 250"
   );
   descriptionInput.required = true;
 
@@ -292,16 +360,14 @@ function newTaskModal() {
     const cleanTitle = inputClean(titleInput.value);
     const cleanTitleFinal = cleanTitle.limited;
     const cleanDescription = inputClean(descriptionInput.value);
-    const cleanDescFinal = cleanDescription.escaped;
+    const cleanDescFinal = cleanDescription.limitedLong;
 
-    if (
-      !cleanTitleFinal ||
-      !cleanDescFinal ||
-      !dueDateInput.value ||
-      !selectPriority.value ||
-      !selectStatus
-    ) {
+    if (cleanTitleFinal.length < 5) {
       titleInput.reportValidity();
+      return;
+    }
+    if (cleanDescFinal.length < 100) {
+      descriptionInput.reportValidity();
       return;
     }
 
@@ -313,6 +379,7 @@ function newTaskModal() {
       status: selectStatus.value,
     });
     ui.renderTasks();
+    ui.renderProjectDetails();
     modal.close();
   });
 
@@ -401,7 +468,7 @@ function editTaskModal() {
     PM().changeTaskDescription(
       PM().getActiveProject(),
       modal.dataset.currentTitle,
-      inputClean(descriptionInput.value).escaped
+      inputClean(descriptionInput.value).limitedLong
     );
     PM().changeTaskDueDate(
       PM().getActiveProject(),
@@ -419,6 +486,7 @@ function editTaskModal() {
       selectStatus.value
     );
     ui.renderTasks();
+    ui.renderProjectDetails();
   });
   return modal;
 }
@@ -435,13 +503,9 @@ function confirmRemoveProjectModal({ projectDiv, currentName }) {
   modal.appendChild(form);
   body.appendChild(modal);
 
-  const confirmText = createEl(
-    "p",
-    null,
-    "confirm-text",
-  );
+  const confirmText = createEl("p", null, "confirm-text");
   confirmText.classList.add("agdasima-regular");
-  confirmText.innerHTML = `Remove Project <span class="to-bold">[${currentName}]</span>?`
+  confirmText.innerHTML = `Remove Project <span class="to-bold">[${currentName}]</span>?`;
   const confirmRemoveBtn = createEl(
     "button",
     "confirm-remove-project-button",
@@ -456,6 +520,7 @@ function confirmRemoveProjectModal({ projectDiv, currentName }) {
     ui.renderProjects();
     PM().setActiveProjectToDefault();
     ui.renderTasks();
+    ui.renderProjectDetails();
     modal.close();
   });
 
@@ -485,13 +550,9 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
   modal.appendChild(form);
   body.appendChild(modal);
 
-  const confirmText = createEl(
-    "p",
-    null,
-    "confirm-text",
-  );
+  const confirmText = createEl("p", null, "confirm-text");
   confirmText.classList.add("agdasima-regular");
-  confirmText.innerHTML = `Remove <span class="to-bold">[${currentTitle}]</span> task from Project <span class="to-bold">[${PM().getActiveProject()}]</span>?`
+  confirmText.innerHTML = `Remove <span class="to-bold">[${currentTitle}]</span> task from Project <span class="to-bold">[${PM().getActiveProject()}]</span>?`;
 
   const confirmRemoveBtn = createEl(
     "button",
@@ -505,6 +566,7 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
     taskDiv.remove();
     PM().removeTask(PM().getActiveProject(), currentTitle);
     ui.renderTasks();
+    ui.renderProjectDetails();
     modal.close();
   });
 
@@ -567,9 +629,12 @@ function reapplyListeners() {
     e.preventDefault();
     if (e.target.matches(".add-new-project-button")) {
       const projectModal = document.querySelector("#project-modal");
-      const nameInput = document.querySelector("#project-name-input");
-      nameInput.value = "New project";
-      // console.log("Adding a new project");
+      document.querySelector("#project-name-input").value = "New project";
+      document.querySelector("#project-about-input").value = "";
+      document.querySelector("#project-due-date-input").value = format(
+        addDays(new Date(), 14),
+        "yyyy-MM-dd"
+      ); //set default due date to 2 weeks from today
       projectModal.style.opacity = "0";
       projectModal.dataset.isNew = true;
       setTimeout(() => {
@@ -595,6 +660,7 @@ function reapplyListeners() {
         window.renderTasksRunning = true;
         // console.log("Calling renderTasks() from utils.js...");
         ui.renderTasks();
+        ui.renderProjectDetails();
         setTimeout(() => {
           window.renderTasksRunning = false;
         }, 100); // Reset flag

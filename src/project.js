@@ -14,38 +14,37 @@ function Project(initialName, initialAbout, initialProjectDueDate, initialTasks 
   };
 
   const addDetails = (newAbout, newDate) => {
-    console.log(`Adding details: ${newAbout} & ${newDate} `);
+    // console.log(`Adding details: ${newAbout} & ${newDate} `);
     projectAbout = newAbout;
     projectDueDate = newDate;
-    console.log(`Current details: ${projectAbout} & ${projectDueDate} `);
+    // console.log(`Current details: ${projectAbout} & ${projectDueDate} `);
   };
 
   const addTask = (taskDetails) => {
-    console.log("Adding task: ", taskDetails);
+    // console.log("Adding task: ", taskDetails);
 
     tasks[taskDetails.title] = { ...taskDetails };
-    console.log("Current task: ", tasks);
+    // console.log("Current task: ", tasks);
   };
 
   const setAbout = (newAbout) => {
-    console.log(`Old about: [${projectAbout}]`);
+    // console.log(`Old about: [${projectAbout}]`);
     projectAbout = newAbout;
-    console.log(`New about: [${projectAbout}]`);
+    // console.log(`New about: [${projectAbout}]`);
   }
 
   const setProjectDueDate = (updatedDate) => {
-    console.log(`Old deadline: ${details[name].projectDueDate}`);
     projectDueDate = updatedDate;
-    console.log(`New deadline: ${projectDueDate}`);
+    // console.log(`New deadline: ${projectDueDate}`);
   }
 
   const setTitle = (taskTitle, newTitle) => {
-    console.log(`Changing [${taskTitle}] task title to [${newTitle}]`);
+    // console.log(`Changing [${taskTitle}] task title to [${newTitle}]`);
     if (!tasks[taskTitle]) {
-      console.log("No such task!");
+      // console.log("No such task!");
       return;
     } else if (tasks[taskTitle].toLowerCase() === newTitle.toLowerCase()) {
-      console.log("Duplicate task title!");
+      // console.log("Duplicate task title!");
       return;
     }
     const task = tasks[taskTitle];
@@ -56,16 +55,16 @@ function Project(initialName, initialAbout, initialProjectDueDate, initialTasks 
 
   const setDescription = (taskTitle, newDesc) => {
     if (!tasks[taskTitle]) {
-      console.log("No such task!");
+      // console.log("No such task!");
       return;
     }
     tasks[taskTitle].description = newDesc;
-    console.log(`Task [${taskTitle}]'s description updated`);
+    // console.log(`Task [${taskTitle}]'s description updated`);
   };
 
   const setDueDate = (taskTitle, newDate) => {
     if (!tasks[taskTitle]) {
-      console.log("No such task!");
+      // console.log("No such task!");
       return;
     }
     tasks[taskTitle].dueDate = newDate;
@@ -74,7 +73,7 @@ function Project(initialName, initialAbout, initialProjectDueDate, initialTasks 
   const setPriority = (taskTitle, newPriority) => {
     console.log(`Changing "${taskTitle}" priority to "${newPriority}"`);
     if (!tasks[taskTitle]) {
-      console.log("No such task!");
+      // console.log("No such task!");
       return;
     }
     tasks[taskTitle].priority = newPriority;
@@ -82,7 +81,7 @@ function Project(initialName, initialAbout, initialProjectDueDate, initialTasks 
 
   const setStatus = (taskTitle, newStatus) => {
     if (!tasks[taskTitle]) {
-      console.log("No such task!");
+      // console.log("No such task!");
       return;
     }
     tasks[title].status = newStatus;
@@ -90,11 +89,11 @@ function Project(initialName, initialAbout, initialProjectDueDate, initialTasks 
 
   const removeTask = (taskTitle) => {
     if (!tasks[taskTitle]) {
-      console.log("No such task!");
+      // console.log("No such task!");
       return;
     }
     delete tasks[taskTitle];
-    console.log(`Task "${taskTitle}" removed`);
+    // console.log(`Task "${taskTitle}" removed`);
   };
 
   const toStr = () =>

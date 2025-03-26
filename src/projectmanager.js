@@ -27,14 +27,14 @@ function ProjectManager() {
     saveToStorage(storageKey, plainProjects);
   };
 
-  const addNewProject = (name) => {
+  const addNewProject = (name, about, date) => {
     for (let project of projects) {
       if (project.getName().toLowerCase() === name.toLowerCase()) {
         // console.log("project name exists!");
         return;
       }
     }
-    const newProject = Project(name, {});
+    const newProject = Project(name, about, date);
     projects.push(newProject);
     saveProjects();
   };
@@ -81,16 +81,19 @@ function ProjectManager() {
   const newProjectDetails = (projectName, projectAbout, projectDate) => {
     const project = getProject(projectName);
     project.addDetails(projectAbout, projectDate);
+    saveProjects();
   };
 
   const changeProjectAbout = (projectName, projectAbout) => {
     const project = getProject(projectName);
     project.setAbout(projectAbout);
+    saveProjects();
   };
 
   const changeProjectDueDate = (projectName, projectDueDate) => {
     const project = getProject(projectName);
     project.setProjectDueDate(projectDueDate);
+    saveProjects();
   };
 
   const deleteProject = (name) => {
@@ -182,7 +185,7 @@ function ProjectManager() {
   const getActiveProject = () => {
     // console.trace("getActiveProject() called. Current:", activeProject);
     const projectNames = projects.map((p) => p.getName());
-    console.log("Available projects:", projectNames);
+    // console.log("Available projects:", projectNames);
     // if (!projectNames.includes(activeProject)) {
     //   console.log(`Active project [${activeProject}] not found`);
     // }
@@ -212,7 +215,7 @@ function ProjectManager() {
 
     newProjectDetails(
       "Home",
-      "Welcome to Get It Done! This is a default project set up to get you started. Click anywhere in this section to edit project details.",
+      "This is a default project set up to get you started. Click Edit button in your Home project to make changes.",
       addDays(new Date(), 30)
     );
 

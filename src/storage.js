@@ -4,7 +4,7 @@ const saveToStorage = (key, data) => {
 
 const loadFromStorage = (key) => {
   const data = JSON.parse(localStorage.getItem(key)) || [];
-  console.log(`Loading from storage (${key}):`, data);
+  // console.log(`Loading from storage (${key}):`, data);
   return data;
 };
 
