@@ -89,8 +89,8 @@ button {
   position: absolute;
   filter: invert(92%) sepia(8%) saturate(142%) hue-rotate(18deg) brightness(97%)
     contrast(91%);
-  top: 2%;
-  left: 2%;
+  top: 1%;
+  left: 1%;
   width: 100px;
   height: auto;
 }
@@ -102,24 +102,12 @@ button {
 
 #projects {
   position: relative;
-  /* min-height: 80vh; */
+  background: #222;
+  border-radius: 10px;
   padding: 10px;
   margin: 0 10px;
+  box-shadow: 7px 7px 7px 1px rgba(0, 0, 0, 0.2);
   z-index: 0;
-}
-
-#projects::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  opacity: 0.1;
-  mix-blend-mode: overlay;
-  z-index: -1;
 }
 
 .project-div {
@@ -141,6 +129,7 @@ button {
   color: rgba(0, 0, 0, 0.9);
 }
 .project-name-div {
+  font-size: 1.5rem;
   width: 85%;
   transition: transform 0.3s ease-in-out;
 }
@@ -162,54 +151,48 @@ button {
 
 .task-main {
   padding: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  /* background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(40, 40, 40, 0.9)
+  ); */
+  background: #222;
   transition: transform 0.3s ease-in-out;
   cursor: pointer;
+  border-radius: 5px;
   will-change: transform;
+  box-shadow: 7px 7px 7px 1px rgba(0, 0, 0, 0.2);
 }
 
-.task-main::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 10px;
-  opacity: 0.1;
-  mix-blend-mode: overlay;
-  z-index: -1;
-  box-shadow: 7px 7px 7px 1px;
+.task-main.high {
+  border-left: 2px solid #fa0202;
 }
 
-.task-main.high::before {
-  background: #ff0606;
+.task-main.medium {
+  border-left: 2px solid #eca711;
 }
 
-.task-main.medium::before {
-  background: #ffc107;
-}
-
-.task-main.low::before {
-  background: #26a69a;
+.task-main.low {
+  border-left: 2px solid #17f0da;
 }
 
 .task-main.finished {
   filter: blur(1px);
   color: #888;
   text-decoration: line-through;
-}
-
-.task-main.finished::before {
   background: #222;
-  border-radius: 10px;
   opacity: 0.6;
-  transition: opacity 0.3s ease-in-out;
-  box-shadow: 0 0 8px #49e786;
+  transition: transform 0.3s, opacity 0.3s ease-in-out;
+  border-left: 2px solid #49e786;
 }
 
 .task-main:hover {
   transform: scale(1.01);
+}
+
+.task-headline, #project-about-headline, #project-due-date-headline {
+  font-size: 1.5rem;
 }
 
 .task-description {
@@ -299,23 +282,13 @@ button {
   margin: 10px;
 }
 
-#due-dates {
+#project-details {
   position: relative;
   min-height: 10vh;
   padding: 10px;
+  background: #222;
+  border-radius: 10px;
+  box-shadow: 7px 7px 7px 1px rgba(0, 0, 0, 0.2);
   z-index: 0;
 }
 
-#due-dates::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  opacity: 0.1;
-  mix-blend-mode: overlay;
-  z-index: -1;
-}
