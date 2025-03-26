@@ -215,7 +215,7 @@ function ProjectManager() {
 
     newProjectDetails(
       "Home",
-      "This is a default project set up to get you started. Click Edit button in your Home project to make changes.",
+      "This is a default project set up to get you started. Click Edit button in the highlighted project to make changes.",
       addDays(new Date(), 30)
     );
 

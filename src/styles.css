@@ -90,7 +90,7 @@ button {
   filter: invert(92%) sepia(8%) saturate(142%) hue-rotate(18deg) brightness(97%)
     contrast(91%);
   top: 1%;
-  left: 1%;
+  left: 0.5%;
   width: 100px;
   height: auto;
 }
@@ -143,20 +143,14 @@ button {
 }
 
 #tasks {
-  /* min-height: 80vh; */
   padding: 10px;
   opacity: 1;
-  /* transition: opacity 0.3s ease-in-out; */
 }
 
 .task-main {
   padding: 10px;
   margin-bottom: 12px;
-  /* background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.9),
-    rgba(40, 40, 40, 0.9)
-  ); */
+
   background: #222;
   transition: transform 0.3s ease-in-out;
   cursor: pointer;
@@ -206,10 +200,7 @@ button {
   padding: 5px;
 }
 
-#task-modal,
-#confirm-remove-project-modal,
-#confirm-remove-task-modal,
-#project-modal {
+dialog {
   position: fixed;
   padding: 10px;
   top: 50%;
@@ -229,30 +220,26 @@ button {
   font-weight: bold;
 }
 
-#task-form,
-#project-form {
+form {
   display: flex;
   flex-direction: column;
   padding: 25px;
   gap: 15px;
 }
 
-#task-form label,
-#project-form label {
+label {
   display: block;
   font-weight: bold;
 }
 
-#task-form input,
-#task-form textarea,
-#task-form select,
-#project-form input,
-#project-form textarea,
-#project-form select {
-  width: 100%;
+input,
+textarea,
+select
+ {
+  min-width: 100%;
 }
 
-#task-form textarea {
+textarea {
   resize: vertical;
   min-height: 80px;
 }
@@ -292,3 +279,6 @@ button {
   z-index: 0;
 }
 
+#project-about-headline, #project-due-date-headline {
+  font-size: 3rem;
+}
