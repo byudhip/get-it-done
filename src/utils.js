@@ -111,7 +111,7 @@ function openEditProjectModal({ currentName }) {
   modal.querySelector("#project-name-input").value = currentName;
 
   modal.dataset.currentName = currentName; // important, rename function will not work without this.
-  console.trace("Send current project name: ", currentName);
+  // console.trace("Send current project name: ", currentName);
   modal.dataset.isNew = false;
   modal.style.opacity = "0";
   modal.showModal();
@@ -161,7 +161,7 @@ function newProjectModal() {
     saveProjectBtn.addEventListener("click", (e) => {
       e.preventDefault();
       const cleaned = inputClean(nameInput.value);
-      console.log(modal.dataset.isNew);
+      // console.log(modal.dataset.isNew);
       if (!cleaned.trimmed) {
         nameInput.reportValidity();
         return;
@@ -173,23 +173,23 @@ function newProjectModal() {
           PM().setActiveProject(cleaned.limited);
           ui.renderTasks();
         }, 310);
-        console.log("isNew variant executed!");
+        // console.log("isNew variant executed!");
         modal.close();
       } else if (modal.dataset.isNew === "false") {
-        console.log("!isNew variant started!");
-        console.log("Current project name is: ", modal.dataset.currentName);
+        // console.log("!isNew variant started!");
+        // console.log("Current project name is: ", modal.dataset.currentName);
         PM().renameProject(modal.dataset.currentName, cleaned.limited);
         ui.renderProjects();
         setTimeout(() => {
           PM().setActiveProject(cleaned.limited);
           ui.renderTasks();
         }, 50);
-        console.log("!isNew variant executed!");
+        // console.log("!isNew variant executed!");
         modal.close();
       }
     });
 
-    const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
+    const closeModalBtn = createEl("button", null, "close-modal-button", "X");
     closeModalBtn.setAttribute("type", "button");
 
     form.appendChild(modalHeadline);
@@ -316,7 +316,7 @@ function newTaskModal() {
     modal.close();
   });
 
-  const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
+  const closeModalBtn = createEl("button", null, "close-modal-button", "X");
 
   form.appendChild(modalHeadline);
   form.appendChild(titleLabel);
@@ -342,10 +342,10 @@ function captureTaskDetails(taskDiv) {
     .querySelector(".task-due-date")
     .textContent.slice(5); //Original String eg "12th May 2024"
   const regexedDate = originalDate.replace(/(\d+)(st|nd|rd|th)/, "$1"); //remove the ordinal suffix eg st nd rd from 1st 2nd 3rd
-  console.log(regexedDate);
+  // console.log(regexedDate);
   const parsedDate = parse(regexedDate, "d MMMM yyyy", new Date()); //convert the string back to Date object
   const formattedDate = format(parsedDate, "yyyy-MM-dd"); //format the Date into readable format for native date picker
-  console.log(formattedDate);
+  // console.log(formattedDate);
   return {
     taskDiv,
     currentTitle: taskDiv.querySelector(".task-headline").textContent,
@@ -440,6 +440,7 @@ function confirmRemoveProjectModal({ projectDiv, currentName }) {
     null,
     "confirm-text",
   );
+  confirmText.classList.add("agdasima-regular");
   confirmText.innerHTML = `Remove Project <span class="to-bold">[${currentName}]</span>?`
   const confirmRemoveBtn = createEl(
     "button",
@@ -458,7 +459,7 @@ function confirmRemoveProjectModal({ projectDiv, currentName }) {
     modal.close();
   });
 
-  const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
+  const closeModalBtn = createEl("button", null, "close-modal-button", "X");
 
   form.appendChild(confirmText);
   form.appendChild(confirmRemoveBtn);
@@ -473,7 +474,7 @@ function confirmRemoveProjectModal({ projectDiv, currentName }) {
       }, 10);
     }, 100);
   } else {
-    console.warn("Modal is already open!");
+    // console.warn("Modal is already open!");
   }
 }
 
@@ -489,6 +490,7 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
     null,
     "confirm-text",
   );
+  confirmText.classList.add("agdasima-regular");
   confirmText.innerHTML = `Remove <span class="to-bold">[${currentTitle}]</span> task from Project <span class="to-bold">[${PM().getActiveProject()}]</span>?`
 
   const confirmRemoveBtn = createEl(
@@ -506,7 +508,7 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
     modal.close();
   });
 
-  const closeModalBtn = createEl("button", null, "close-modal-button", "✖");
+  const closeModalBtn = createEl("button", null, "close-modal-button", "X");
 
   form.appendChild(confirmText);
   form.appendChild(confirmRemoveBtn);
@@ -521,7 +523,7 @@ function confirmRemoveTaskModal({ taskDiv, currentTitle }) {
       }, 10);
     }, 100);
   } else {
-    console.warn("Modal is already open!");
+    // console.warn("Modal is already open!");
   }
 }
 
@@ -552,7 +554,7 @@ function reapplyListeners() {
     task.addEventListener("click", (e) => {
       const taskDiv = e.target.closest(".task-main");
       const taskDetails = captureTaskDetails(taskDiv);
-      console.log("Task div:", taskDiv, ", Clicked element:", e.target);
+      // console.log("Task div:", taskDiv, ", Clicked element:", e.target);
       if (e.target.matches(".remove-task-button")) {
         confirmRemoveTaskModal(taskDetails);
       } else {
@@ -567,7 +569,7 @@ function reapplyListeners() {
       const projectModal = document.querySelector("#project-modal");
       const nameInput = document.querySelector("#project-name-input");
       nameInput.value = "New project";
-      console.log("Adding a new project");
+      // console.log("Adding a new project");
       projectModal.style.opacity = "0";
       projectModal.dataset.isNew = true;
       setTimeout(() => {
@@ -591,7 +593,7 @@ function reapplyListeners() {
       if (!window.renderTasksRunning) {
         // Prevent multiple executions
         window.renderTasksRunning = true;
-        console.log("Calling renderTasks() from utils.js...");
+        // console.log("Calling renderTasks() from utils.js...");
         ui.renderTasks();
         setTimeout(() => {
           window.renderTasksRunning = false;
